@@ -59,6 +59,12 @@ const getUserGroups = async function getUserGroupChatsFromId(id: string) {
                                 }
                             }
                         }
+                    },
+                    admins: {
+                        select: {
+                            id: true,
+                            username: true,
+                        },
                     }
                 }
             }
