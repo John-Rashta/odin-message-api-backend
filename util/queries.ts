@@ -1,6 +1,6 @@
 import prisma from "../config/client";
 import { Types } from "@prisma/client";
-import { MessagesOptions } from "./types";
+import { GroupOptions, MessagesOptions, UserOptions } from "./types";
 
 const getUser = async function getUserFromDatabase(id: string) {
     const possibleUser = await prisma.user.findFirst({
@@ -279,6 +279,17 @@ const checkIfGroupAdmin = async function checkIfUserIsAnAdminOfAGroupChat(userid
     return possibleGroup;
 };
 
+const checkOwnerOfMessage = async function checkIfUserOwnsMessage(userid: string, messageid: string) {
+    const possibleMessage = await prisma.messages.findFirst({
+        where: {
+            id: messageid,
+            senderid: userid
+        }
+    });
+
+    return possibleMessage;
+};
+
 const createRequest = async function createRequestBetweenUsers(senderid: string, receiverid: string, type: Types, sentAt: string) {
     const createdRequest = await prisma.requests.create({
         data: {
@@ -390,7 +401,122 @@ const createMessage = async function createMessageForGroupOrConvo(content: strin
     return createdMessage;
 };
 
+const updateMessage = async function updateMessageContent(messageid: string, content: string) {
+    const updatedMessage = await prisma.messages.update({
+        where: {
+            id: messageid,
+        },
+        data: {
+            content
+        }
+    });
 
+    return updatedMessage;
+};
+
+const changeUserInfo = async function updateUserDetails(userid: string, options: UserOptions ) {
+    const updatedUser = await prisma.user.update({
+        where: {
+            id: userid,
+        },
+        data: {
+            ...(typeof options.username === "string" ? {
+                username: options.username
+            } : typeof options.password === "string" ? {
+                password: options.password
+            } : {})
+        }
+    });
+
+    return updatedUser;
+};
+
+const updateGroupInfo = async function updateGroupDetails(groupid: string, options: GroupOptions) {
+    const optionsManager = {
+        ADD: "connect",
+        REMOVE: "disconnect"
+    };
+
+    const updatedGroup = await prisma.groupChat.update({
+        where: {
+            id: groupid
+        },
+        data: {
+            ...(typeof options.name === "string" ? { name: options.name} : {}),
+            ...(typeof options.adminid === "string" && (options.action === "ADD" || options.action === "REMOVE") ? {admins : {
+                [optionsManager[options.action]]: {
+                    id: options.adminid
+                }
+            }}: typeof options.memberid === "string" && (options.action === "ADD" || options.action === "REMOVE") ? {members: {
+                [optionsManager[options.action]]: {
+                    id: options.memberid
+                }
+            }} : {}),
+        }
+    });
+
+    return updatedGroup;
+};
+
+const deleteUser = async function deleteUserFromDatabase(userid: string) {
+    const deletedUser = await prisma.user.delete({
+        where: {
+            id: userid
+        }
+    });
+
+    return deletedUser;
+};
+
+const deleteFriendship = async function deleteFriendshipFromDatabase(friendshipid: string) {
+    const deletedFriendship = await prisma.friendships.delete({
+        where: {
+            id: friendshipid
+        }
+    });
+
+    return deletedFriendship;
+};
+
+const deleteGroup = async function deleteGroupChatFromDatabase(groupid: string) {
+    const deletedGroup = await prisma.groupChat.delete({
+        where: {
+            id: groupid,
+        }
+    });
+
+    return deletedGroup;
+};
+
+const deleteConversation = async function deleteConversationFromDatabase(convoid: string) {
+    const deletedConversation = await prisma.conversations.delete({
+        where: {
+            id: convoid
+        }
+    });
+
+    return deletedConversation;
+};
+
+const deleteRequest = async function deleteRequestFromDatabase(requestid: string) {
+    const deletedRequest = await prisma.requests.delete({
+        where: {
+            id: requestid,
+        }
+    });
+
+    return deletedRequest;
+};
+
+const deleteMessage = async function deleteMessageFromDatabase(messageid: string) {
+    const deletedMessage = await prisma.messages.delete({
+        where: {
+            id: messageid
+        }
+    });
+
+    return deletedMessage;
+};
 
 export { 
     getUser, 
@@ -411,4 +537,14 @@ export {
     createConversation,
     createFriendship,
     createMessage,
+    updateMessage,
+    checkOwnerOfMessage,
+    updateGroupInfo,
+    changeUserInfo,
+    deleteConversation,
+    deleteFriendship,
+    deleteGroup,
+    deleteMessage,
+    deleteRequest,
+    deleteUser,
 };
