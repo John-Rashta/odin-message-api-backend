@@ -12,7 +12,10 @@ interface GroupOptions {
     adminid?: string,
     memberid?: string,
     name?: string,
-    action?: string,
+    action?: ActionTypes,
 };
 
-export { MessagesOptions, UserOptions, GroupOptions };
+type ActionTypes = "ADD" | "REMOVE";
+type RequestTypes = "sender" | "receiver";
+
+export { MessagesOptions, UserOptions, GroupOptions, RequestTypes };

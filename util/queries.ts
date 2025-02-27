@@ -1,6 +1,6 @@
 import prisma from "../config/client";
 import { Types } from "@prisma/client";
-import { GroupOptions, MessagesOptions, UserOptions } from "./types";
+import { GroupOptions, MessagesOptions, RequestTypes, UserOptions } from "./types";
 
 const getUser = async function getUserFromDatabase(id: string) {
     const possibleUser = await prisma.user.findFirst({
@@ -268,6 +268,21 @@ const checkIfGroupAdmin = async function checkIfUserIsAnAdminOfAGroupChat(userid
     const possibleGroup = await prisma.groupChat.findFirst({
         where: {
             id: groupid,
+            admins: {
+                some: {
+                    id: userid
+                }
+            }
+        }
+    });
+
+    return possibleGroup;
+};
+
+const checkIfGroupMember = async function checkIfUserAlreadyAMemberOfGroupChat(userid: string, groupid: string) {
+    const possibleGroup = await prisma.groupChat.findFirst({
+        where: {
+            id: groupid,
             members: {
                 some: {
                     id: userid
@@ -330,7 +345,12 @@ const createGroupChat = async function createGroupChatForUser(userid:  string, n
                     id: userid
                 }
             },
-            name,
+            name, 
+            members: {
+                connect: {
+                    id: userid
+                }
+            }
         }
     });
 
@@ -518,6 +538,135 @@ const deleteMessage = async function deleteMessageFromDatabase(messageid: string
     return deletedMessage;
 };
 
+const checkIfUsernameAvailable = async function checkIfUsernameAlreadyInUse(username: string) {
+    const possibleUser = await prisma.user.findFirst({
+        where: {
+            username,
+        },
+        select: {
+            username: true,
+        }
+    });
+
+    return possibleUser;
+};
+
+const checkIfFriendshipExists = async function checkIfFriendshipAlreadyExistsBetweenUsers(userAid: string, userBid: string) {
+    const possibleFriendship = await prisma.friendships.findFirst({
+        where: {
+            AND: [
+               {
+                users: {
+                    some: {
+                        id: userAid
+                    }
+                }
+               },
+               {
+                users: {
+                    some: {
+                        id: userBid
+                    }
+                }
+               }
+            ]
+        }
+    });
+
+    return possibleFriendship;
+};
+
+const checkIfConvoExistsByUsers = async function checkIfConversationAlreadyExistsBetweenUsers(userAid: string, userBid: string) {
+    const possibleConvo = await prisma.conversations.findFirst({
+        where: {
+            AND: [
+                {
+                    members: {
+                        some: {
+                            id: userAid,
+                        }
+                    }
+                },
+                {
+                    members: {
+                        some: {
+                            id: userBid,
+                        }
+                    }
+                },
+            ]
+        }
+    });
+
+    return possibleConvo;
+};
+
+const checkIfConvoIdValid = async function checkIfConversationExistsById(convoid: string) {
+    const possibleConvo = await prisma.conversations.findFirst({
+        where: {
+            id: convoid
+        }
+    });
+
+    return possibleConvo;
+};
+
+const checkIfGroupExists = async function checkIfGroupChatExistsById(groupid: string) {
+    const possibleGroup = await prisma.groupChat.findFirst({
+        where: {
+            id: groupid
+        }
+    });
+
+    return possibleGroup;
+};
+
+const checkIfUserInRequest = async function checkIfUserSentTheRequest(userid: string, requestid: string, type: RequestTypes) {
+    const checkManager = {
+        sender: "senderid",
+        receiver: "receiverid",
+    };
+    const possibleRequest = await prisma.requests.findFirst({
+        where: {
+            id: requestid,
+            [checkManager[type]]: userid,
+        }
+    });
+
+    return possibleRequest;
+};
+
+const checkIfInConvo = async function checkIfUserInConversation(userid: string, convoid: string) {
+    const possibleConvo = await prisma.conversations.findFirst({
+        where: {
+            id: convoid,
+            members: {
+                some: {
+                    id: userid
+                }
+            }
+
+        }
+    });
+
+    return possibleConvo;
+};
+
+const checkIfInFriendship = async function checkIfUserInFriendship(userid: string, friendshipid: string) {
+    const possibleFriendship = await prisma.friendships.findFirst({
+        where: {
+            id: friendshipid,
+            users: {
+                some: {
+                    id: userid
+                }
+            }
+        }
+    });
+
+    return possibleFriendship;
+};
+
 export { 
     getUser, 
     getUserFriends, 
@@ -547,4 +696,13 @@ export {
     deleteMessage,
     deleteRequest,
     deleteUser,
+    checkIfGroupMember,
+    checkIfFriendshipExists,
+    checkIfUsernameAvailable,
+    checkIfConvoExistsByUsers,
+    checkIfUserInRequest,
+    checkIfConvoIdValid,
+    checkIfGroupExists,
+    checkIfInConvo,
+    checkIfInFriendship,
 };
