@@ -1,4 +1,6 @@
 import prisma from "../config/client";
+import { Types } from "@prisma/client";
+import { MessagesOptions } from "./types";
 
 const getUser = async function getUserFromDatabase(id: string) {
     const possibleUser = await prisma.user.findFirst({
@@ -260,7 +262,134 @@ const getConvoMessagesFromId = async function getConvoMessagesFromConvoId(convoi
     });
 
     return possibleMessages;
-}
+};
+
+const checkIfGroupAdmin = async function checkIfUserIsAnAdminOfAGroupChat(userid: string, groupid: string) {
+    const possibleGroup = await prisma.groupChat.findFirst({
+        where: {
+            id: groupid,
+            members: {
+                some: {
+                    id: userid
+                }
+            }
+        }
+    });
+
+    return possibleGroup;
+};
+
+const createRequest = async function createRequestBetweenUsers(senderid: string, receiverid: string, type: Types, sentAt: string) {
+    const createdRequest = await prisma.requests.create({
+        data: {
+            receiver: {
+                connect: {
+                    id: receiverid
+                }
+            },
+            sender : {
+                connect: {
+                    id: senderid
+                }
+            },
+            type,
+            sentAt,
+        }
+    });
+
+    return createdRequest;
+};
+
+const createUser = async function createUserWithUsernameAndPassword(username: string, password: string) {
+    const createdUser = await prisma.user.create({
+        data: {
+            username,
+            password
+        }
+    });
+
+    return createdUser;
+};
+
+const createGroupChat = async function createGroupChatForUser(userid:  string, name = "New Group") {
+    const createdGroup = await prisma.groupChat.create({
+        data: {
+            admins: {
+                connect: {
+                    id: userid
+                }
+            },
+            name,
+        }
+    });
+
+    return createdGroup;
+};
+
+const createConversation = async function createConversationBetweenUsers(userAid: string, userBid: string) {
+    const createdConversation = await prisma.conversations.create({
+        data: {
+            members: {
+                connect: [
+                    {
+                        id: userAid
+                    },
+                    {
+                        id: userBid
+                    }
+                ]
+            }
+        }
+    });
+
+    return createdConversation;
+};
+
+const createFriendship = async function createFriendshipBetweenUsers(userAid: string, userBid: string) {
+    const createdFriendship = await prisma.friendships.create({
+        data: {
+            users: {
+                connect: [
+                    {
+                        id: userAid,
+                    },
+                    {
+                        id: userBid,
+                    }
+                ]
+            }
+        }
+    });
+
+    return createdFriendship;
+};
+
+const createMessage = async function createMessageForGroupOrConvo(content: string, userid: string, sentAt: string, options: MessagesOptions) {
+    const createdMessage = await prisma.messages.create({
+        data: {
+            sentAt,
+            content,
+            sender: {
+                connect: {
+                    id: userid,
+                }
+            },
+            ...(typeof options.convoid === "string" ? {convo: {
+                connect: {
+                    id: options.convoid
+                }
+            }}: typeof options.groupid === "string" ? {group: {
+                connect: {
+                    id: options.groupid
+                }
+            }}: {}),
+
+        }
+    });
+
+    return createdMessage;
+};
+
 
 
 export { 
@@ -275,4 +404,11 @@ export {
     getConvoMessages,
     getGroupChatMessages,
     getConvoMessagesFromId,
+    checkIfGroupAdmin,
+    createRequest,
+    createUser,
+    createGroupChat,
+    createConversation,
+    createFriendship,
+    createMessage,
 };

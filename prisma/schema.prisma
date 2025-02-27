@@ -29,9 +29,9 @@ model User {
 model Requests {
   id String @id @default(uuid())
   type Types
-  sender User @relation("sentRequests", fields: [senderid], references: [id])
+  sender User @relation("sentRequests", fields: [senderid], references: [id], onDelete: Cascade)
   senderid String
-  receiver User @relation("receiveRequests", fields: [receiverid], references: [id])
+  receiver User @relation("receiveRequests", fields: [receiverid], references: [id], onDelete:  Cascade)
   receiverid String
   sentAt DateTime
 }
@@ -59,11 +59,11 @@ model Messages {
   id String @id @default(uuid())
   sentAt DateTime
   content String
-  sender User @relation(fields: [senderid], references: [id])
+  sender User @relation(fields: [senderid], references: [id], onDelete: Cascade)
   senderid String
-  convo Conversations? @relation(fields: [convoid], references: [id])
+  convo Conversations? @relation(fields: [convoid], references: [id], onDelete: Cascade)
   convoid String?
-  group GroupChat? @relation(fields: [groupid], references: [id])
+  group GroupChat? @relation(fields: [groupid], references: [id], onDelete: Cascade)
   groupid String?
 }
 
