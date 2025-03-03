@@ -7,6 +7,8 @@ import cors from "cors";
 import { errorHandler } from "./middleware/errorMiddleware";
 import prisma from "./config/client";
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import authRoute from "./routes/authRoute";
+import usersRoute from "./routes/usersRoute";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,9 +36,8 @@ import "./config/passport";
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
+app.use("/auth", authRoute);
+app.use("/users", usersRoute);
 
 app.use(errorHandler);
 
