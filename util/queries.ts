@@ -2,10 +2,24 @@ import prisma from "../config/client";
 import { Types } from "@prisma/client";
 import { GroupOptions, MessagesOptions, RequestTypes, UserOptions } from "./types";
 
+const getUserByName = async function getUserFromDatabaseByUsername(username: string) {
+    const possibleUser = await prisma.user.findFirst({
+        where: {
+            username
+        }
+    });
+
+    return possibleUser;
+};
+
 const getUser = async function getUserFromDatabase(id: string) {
     const possibleUser = await prisma.user.findFirst({
         where: {
             id
+        },
+        select: {
+            id: true,
+            username: true,
         }
     });
     return possibleUser;
@@ -668,6 +682,7 @@ const checkIfInFriendship = async function checkIfUserInFriendship(userid: strin
 };
 
 export { 
+    getUserByName,
     getUser, 
     getUserFriends, 
     getUserGroupsInfo, 
