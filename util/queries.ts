@@ -129,7 +129,7 @@ const getAllUserRequests = async function getUserRequestsFromDatabase(id: string
         where: {
             id,
         },
-        include: {
+        select: {
             receivedRequest: {
                 select: {
                     sender: {
@@ -141,7 +141,9 @@ const getAllUserRequests = async function getUserRequestsFromDatabase(id: string
                     sentAt: true,
                     type: true,
                 }
-            }
+            },
+            id: true,
+            username: true
         }
     });
 
@@ -319,7 +321,7 @@ const checkOwnerOfMessage = async function checkIfUserOwnsMessage(userid: string
     return possibleMessage;
 };
 
-const createRequest = async function createRequestBetweenUsers(senderid: string, receiverid: string, type: Types, sentAt: string) {
+const createRequest = async function createRequestBetweenUsers(senderid: string, receiverid: string, type: Types, sentAt: string, groupid?: string) {
     const createdRequest = await prisma.requests.create({
         data: {
             receiver: {
@@ -334,6 +336,13 @@ const createRequest = async function createRequestBetweenUsers(senderid: string,
             },
             type,
             sentAt,
+            ...(groupid ? {
+                group: {
+                    connect:{
+                        id: groupid
+                    }
+                }
+            } : {}),
         }
     });
 
@@ -635,7 +644,7 @@ const checkIfGroupExists = async function checkIfGroupChatExistsById(groupid: st
     return possibleGroup;
 };
 
-const checkIfUserInRequest = async function checkIfUserSentTheRequest(userid: string, requestid: string, type: RequestTypes) {
+const checkIfUserRoleInRequest = async function checkIfUserSentTheRequest(userid: string, requestid: string, type: RequestTypes) {
     const checkManager = {
         sender: "senderid",
         receiver: "receiverid",
@@ -644,6 +653,27 @@ const checkIfUserInRequest = async function checkIfUserSentTheRequest(userid: st
         where: {
             id: requestid,
             [checkManager[type]]: userid,
+        },
+        include: {
+            group: true
+        }
+    });
+
+    return possibleRequest;
+};
+
+const checkIfUserInRequest = async function checkIfUserSentTheRequest(userid: string, requestid: string) {
+    const possibleRequest = await prisma.requests.findFirst({
+        where: {
+            id: requestid,
+            OR: [
+                {
+                    senderid: userid,
+                },
+                {
+                    receiverid: userid,
+                }
+            ]
         }
     });
 
@@ -681,6 +711,34 @@ const checkIfInFriendship = async function checkIfUserInFriendship(userid: strin
     return possibleFriendship;
 };
 
+const getRequestInfo = async function getRequestInfoFromDatabase(requestid: string) {
+    const possibleRequest = await prisma.requests.findFirst({
+        where: {
+            id: requestid,
+        },
+        select: {
+            id: true,
+            sentAt: true,
+            type: true,
+            sender: {
+                select: {
+                    id: true,
+                    username:true,
+                },
+            },
+            receiver: {
+                select: {
+                    id: true,
+                    username: true,
+                }
+            }
+
+        }
+    });
+
+    return possibleRequest;
+};
+
 export { 
     getUserByName,
     getUser, 
@@ -715,9 +773,11 @@ export {
     checkIfFriendshipExists,
     checkIfUsernameAvailable,
     checkIfConvoExistsByUsers,
-    checkIfUserInRequest,
+    checkIfUserRoleInRequest,
     checkIfConvoIdValid,
     checkIfGroupExists,
     checkIfInConvo,
     checkIfInFriendship,
+    getRequestInfo,
+    checkIfUserInRequest,
 };

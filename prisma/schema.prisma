@@ -32,6 +32,8 @@ model Requests {
   sender User @relation("sentRequests", fields: [senderid], references: [id], onDelete: Cascade)
   senderid String
   receiver User @relation("receiveRequests", fields: [receiverid], references: [id], onDelete:  Cascade)
+  group GroupChat? @relation(fields: [groupid], references: [id], onDelete: Cascade)
+  groupid String?
   receiverid String
   sentAt DateTime
 }
@@ -41,7 +43,8 @@ model GroupChat {
   name String?
   admins User[] @relation("groupsAdmin")
   members User[] @relation("groupsJoined")
-  contents Messages[] 
+  contents Messages[]
+  request Requests[]
 }
 
 model Conversations {
