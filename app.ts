@@ -9,6 +9,8 @@ import prisma from "./config/client";
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import authRoute from "./routes/authRoute";
 import usersRoute from "./routes/usersRoute";
+import requestsRoute from "./routes/requestsRoute";
+import friendsRoute from "./routes/friendsRoute";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -33,11 +35,14 @@ app.use(session({
 
 import "./config/passport";
 
+
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/auth", authRoute);
 app.use("/users", usersRoute);
+app.use("/requests", requestsRoute);
+app.use("/friends", friendsRoute);
 
 app.use(errorHandler);
 
