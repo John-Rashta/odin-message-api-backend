@@ -155,10 +155,13 @@ const getAllUserRequests = async function getUserRequestsFromDatabase(id: string
                     },
                     sentAt: true,
                     type: true,
+                },
+                orderBy: {
+                    sentAt: "desc"
                 }
             },
             id: true,
-            username: true
+            username: true,
         }
     });
 
@@ -207,6 +210,9 @@ const getUserSentRequests = async function getUserSentRequestsFromDatabase(id: s
                             id: true,
                         }
                     }
+                },
+                orderBy: {
+                    sentAt: "desc",
                 }
             }
         }
