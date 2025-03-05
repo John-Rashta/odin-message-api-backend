@@ -12,7 +12,7 @@ const getUserByName = async function getUserFromDatabaseByUsername(username: str
     return possibleUser;
 };
 
-const getUser = async function getUserFromDatabase(id: string) {
+const getUser = async function getUserFromDatabase(id: string, status = false) {
     const possibleUser = await prisma.user.findFirst({
         where: {
             id
@@ -23,7 +23,8 @@ const getUser = async function getUserFromDatabase(id: string) {
             icon: true,
             name: true,
             username: true,
-            aboutMe: true
+            aboutMe: true,
+            ...(status ? { online: true } : {})
         }
     });
     return possibleUser;
@@ -41,6 +42,7 @@ const getUserFriends = async function getFriendsFromUserId(id: string) {
                         select: {
                             username: true,
                             id: true,
+                            online: true,
                         },
                         where: {
                             NOT: {
@@ -821,7 +823,20 @@ const getIconInfo = async function getIconFromId(iconid: number) {
     return iconInfo;
 };
 
-export { 
+const changeOnlineStatus = async function changeOnlineStatusOfUser(userid: string, status: boolean) {
+    const userInfo = await prisma.user.update({
+        where: {
+            id: userid,
+        },
+        data: {
+            online: status
+        }
+    });
+
+    return userInfo;
+};
+
+export {
     getUserByName,
     getUser, 
     getUserFriends, 
@@ -864,4 +879,5 @@ export {
     checkIfUserInRequest,
     searchForUsers,
     getIconInfo,
+    changeOnlineStatus,
 };

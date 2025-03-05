@@ -21,6 +21,7 @@ model User {
   icon Int @default(1)
   joinedAt DateTime
   aboutMe String?
+  online Boolean @default(false)
   sentMessages Messages[]
   friendlist Friendships[]
   convos Conversations[]

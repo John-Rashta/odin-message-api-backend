@@ -1,9 +1,21 @@
-import passport from "passport";
 import asyncHandler from "express-async-handler";
+import { changeOnlineStatus } from "../util/queries";
 
-const loginUser = passport.authenticate("local");
+const loginUser = asyncHandler(async(req, res) => {
+  if (!req.user) {
+    res.status(400).json();
+    return;
+  };
+  await changeOnlineStatus(req.user.id, true);
+  res.status(200).json();
+});
 
 const logoutUser = asyncHandler(async (req, res, next) => {
+  if (!req.user) {
+    res.status(400).json();
+    return;
+  };
+  await changeOnlineStatus(req.user.id, false);
   req.logout((err) => {
     if (err) {
       next(err);
