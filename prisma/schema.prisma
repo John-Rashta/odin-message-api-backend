@@ -17,6 +17,10 @@ model User {
   id String @id @default(uuid())
   username String
   password String
+  name String?
+  icon Int @default(1)
+  joinedAt DateTime
+  aboutMe String?
   sentMessages Messages[]
   friendlist Friendships[]
   convos Conversations[]
@@ -62,6 +66,7 @@ model Messages {
   id String @id @default(uuid())
   sentAt DateTime
   content String
+  edited Boolean @default(false)
   sender User @relation(fields: [senderid], references: [id], onDelete: Cascade)
   senderid String
   convo Conversations? @relation(fields: [convoid], references: [id], onDelete: Cascade)
@@ -75,6 +80,11 @@ model Session {
   sid       String   @unique
   data      String
   expiresAt   DateTime
+}
+
+model Icons {
+  id Int @id @default(autoincrement())
+  source String
 }
 
 enum Types {

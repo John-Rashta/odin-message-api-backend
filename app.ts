@@ -11,6 +11,7 @@ import authRoute from "./routes/authRoute";
 import usersRoute from "./routes/usersRoute";
 import requestsRoute from "./routes/requestsRoute";
 import friendsRoute from "./routes/friendsRoute";
+import conversationsRoute from "./routes/conversationsRoute";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,7 +36,6 @@ app.use(session({
 
 import "./config/passport";
 
-
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -43,6 +43,7 @@ app.use("/auth", authRoute);
 app.use("/users", usersRoute);
 app.use("/requests", requestsRoute);
 app.use("/friends", friendsRoute);
+app.use("/conversations", conversationsRoute);
 
 app.use(errorHandler);
 

@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { matchedData } from "express-validator";
-import { checkIfUserInRequest, getAllUserRequests, getRequestInfo, createRequest, getUser, deleteRequest, checkIfUserRoleInRequest, createFriendship, checkIfGroupMember, updateGroupInfo } from "../util/queries";
+import { checkIfUserInRequest, getAllUserRequests, getRequestInfo, createRequest, getUser, deleteRequest, checkIfUserRoleInRequest, createFriendship, checkIfGroupMember, updateGroupInfo, checkIfFriendshipExists, findIfRequestExists } from "../util/queries";
 
 const getRequests = asyncHandler(async(req, res) => {
     if (!req.user) {
@@ -47,12 +47,25 @@ const makeRequest = asyncHandler(async(req, res) => {
     if(!checkTarget) {
         res.status(400).json();
         return;
-    }
+    };
+
+    const checkIfRequestExists = await findIfRequestExists(req.user.id, formData.targetid, formData.type);
+    if (checkIfRequestExists) {
+        res.status(400).json({message: "Request Already Sent"});
+        return;
+    };
     if (formData.type === "FRIEND" || formData.type === "GROUP" ) {
         if (formData.type === "GROUP" && !formData.groupid) {
             res.status(400).json();
             return;
         };
+        if (formData.type === "FRIEND") {
+            const checkIfFriends = await checkIfFriendshipExists(req.user.id, formData.targetid);
+            if (checkIfFriends) {
+                res.status(400).json({message: "Already Friends"});
+                return;
+            }
+        }
         await createRequest(req.user.id, formData.targetid, formData.type, Date(), formData.groupid || null);
         res.status(200).json();
         return;

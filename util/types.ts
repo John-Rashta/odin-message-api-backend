@@ -15,7 +15,23 @@ interface GroupOptions {
     action?: ActionTypes,
 };
 
+interface UserProfile {
+    name?: string,
+    aboutMe?: string,
+    icon?: number,
+};
+
+interface UserSign extends UserProfile {
+    username: string,
+    password: string,
+    joinedAt: string,
+}
+
+interface UserUpdate extends UserProfile, UserOptions {
+
+};
+
 type ActionTypes = "ADD" | "REMOVE";
 type RequestTypes = "sender" | "receiver";
 
-export { MessagesOptions, UserOptions, GroupOptions, RequestTypes };
+export { MessagesOptions, UserOptions, GroupOptions, RequestTypes, UserProfile, UserSign, UserUpdate };

@@ -1,6 +1,6 @@
 import prisma from "../config/client";
 import { Types } from "@prisma/client";
-import { GroupOptions, MessagesOptions, RequestTypes, UserOptions } from "./types";
+import { GroupOptions, MessagesOptions, RequestTypes, UserSign, UserUpdate } from "./types";
 
 const getUserByName = async function getUserFromDatabaseByUsername(username: string) {
     const possibleUser = await prisma.user.findFirst({
@@ -19,7 +19,11 @@ const getUser = async function getUserFromDatabase(id: string) {
         },
         select: {
             id: true,
+            joinedAt: true,
+            icon: true,
+            name: true,
             username: true,
+            aboutMe: true
         }
     });
     return possibleUser;
@@ -81,7 +85,7 @@ const getUserGroupsInfo = async function getUserGroupChatsFromId(id: string) {
     return possibleUser;
 };
 
-const findIfRequestExists = async function searchDatabaseIfRequestAlreadyExists(senderid: string, receiverid: string) {
+const findIfRequestExists = async function searchDatabaseIfRequestAlreadyExists(senderid: string, receiverid: string, type: Types) {
 
     const possibleRequest = await prisma.requests.findFirst({
         where: {
@@ -92,7 +96,8 @@ const findIfRequestExists = async function searchDatabaseIfRequestAlreadyExists(
                 {
                     receiverid,
                 }
-            ]
+            ],
+            type
         }
     });
 
@@ -106,6 +111,7 @@ const getUserConversationsInfo = async function getAllOfUserConversationsFromDat
         },
         select: {
             id: true,
+            username: true,
             convos: {
                 select: {
                     id: true,
@@ -113,6 +119,13 @@ const getUserConversationsInfo = async function getAllOfUserConversationsFromDat
                         select: {
                             username: true,
                             id: true,
+                        },
+                        where: {
+                            NOT: [
+                                {
+                                    id
+                                }
+                            ]
                         }
                     }
                 },
@@ -216,68 +229,90 @@ const getGroupChatMessages = async function getGroupChatMessagesFromItsId(id: st
             },
             content: true,
             sentAt: true,
+            edited: true,
         }
     });
 
     return possibleMessages;
 };
 
-const getConvoMessages = async function getConvoMessagesFromIds(userid: string, receiverid: string) {
-    const possibleMessages = await prisma.messages.findMany({
+const getConvoInfo = async function getConvoInfoFromIds(userid: string, receiverid: string) {
+    const possibleConvo = await prisma.conversations.findFirst({
         where: {
-            convo: {
-                AND: [
-                    {
-                        members: {
-                            some: {
-                                id: userid
-                            }
-                        }
-                    },
-                    {
-                        members: {
-                            some: {
-                                id: receiverid
-                            }
+            AND: [
+                {
+                    members: {
+                        some: {
+                            id: userid
                         }
                     }
-            ]
-                
-            }
-        },
-        select: {
-            sender: {
-                select: {
-                    username: true,
-                    id: true,
                 },
-            },
-            sentAt: true,
-            content: true,
-        }
-    });
-
-    return possibleMessages;
-};
-
-const getConvoMessagesFromId = async function getConvoMessagesFromConvoId(convoid: string) {
-    const possibleMessages = await prisma.messages.findMany({
-        where: {
-            convoid
+                {
+                    members: {
+                        some: {
+                            id: receiverid
+                        }
+                    }
+                }
+            ],
         },
         select: {
-            sender: {
-                select: { 
-                    username: true,
-                    id:true,
+            contents: {
+                select: {
+                    sender: {
+                        select: {
+                            username: true,
+                            id: true,
+                        },
+                    },
+                    sentAt: true,
+                    content: true,
+                    edited: true,
                 }
             },
-            content: true,
-            sentAt: true,
-        }
+            id: true,
+        members: {
+            select: {
+                id: true,
+                username: true,
+            }
+        }   
+        },
+    });
+    return possibleConvo;
+};
+
+const getConvoInfoFromId = async function getConvoInfoFromConvoId(convoid: string) {
+    const possibleConvo = await prisma.conversations.findFirst({
+        where: {
+            id: convoid,
+            
+        },
+        select: {
+            contents: {
+                select: {
+                    sender: {
+                        select: {
+                            username: true,
+                            id: true,
+                        },
+                    },
+                    sentAt: true,
+                    content: true,
+                    edited: true,
+                }
+            },
+            id: true,
+        members: {
+            select: {
+                id: true,
+                username: true,
+            }
+        }   
+        },
     });
 
-    return possibleMessages;
+    return possibleConvo;
 };
 
 const checkIfGroupAdmin = async function checkIfUserIsAnAdminOfAGroupChat(userid: string, groupid: string) {
@@ -349,11 +384,10 @@ const createRequest = async function createRequestBetweenUsers(senderid: string,
     return createdRequest;
 };
 
-const createUser = async function createUserWithUsernameAndPassword(username: string, password: string) {
+const createUser = async function createUserWithUsernameAndPassword(options: UserSign) {
     const createdUser = await prisma.user.create({
         data: {
-            username,
-            password
+            ...options
         }
     });
 
@@ -450,24 +484,29 @@ const updateMessage = async function updateMessageContent(messageid: string, con
             id: messageid,
         },
         data: {
-            content
+            content,
+            edited: true
         }
     });
 
     return updatedMessage;
 };
 
-const changeUserInfo = async function updateUserDetails(userid: string, options: UserOptions ) {
+const changeUserInfo = async function updateUserDetails(userid: string, options: UserUpdate ) {
     const updatedUser = await prisma.user.update({
         where: {
             id: userid,
         },
         data: {
-            ...(typeof options.username === "string" ? {
-                username: options.username
-            } : typeof options.password === "string" ? {
-                password: options.password
-            } : {})
+            ...options
+        },
+        select: {
+            id: true,
+            joinedAt: true,
+            icon: true,
+            name: true,
+            username: true,
+            aboutMe: true
         }
     });
 
@@ -690,7 +729,28 @@ const checkIfInConvo = async function checkIfUserInConversation(userid: string, 
                 }
             }
 
-        }
+        },
+        select: {
+            contents: {
+                select: {
+                    sender: {
+                        select: {
+                            username: true,
+                            id: true,
+                        },
+                    },
+                    sentAt: true,
+                    content: true,
+                }
+            },
+            id: true,
+        members: {
+            select: {
+                id: true,
+                username: true,
+            }
+        }   
+        },
     });
 
     return possibleConvo;
@@ -739,6 +799,28 @@ const getRequestInfo = async function getRequestInfoFromDatabase(requestid: stri
     return possibleRequest;
 };
 
+const searchForUsers = async function searchForUsersByUsername(username: string) {
+    const possibleUsers = await prisma.user.findMany({
+        where: {
+            username: {
+                contains: username
+            }
+        }
+    });
+
+    return possibleUsers;
+};
+
+const getIconInfo = async function getIconFromId(iconid: number) {
+    const iconInfo = await prisma.icons.findFirst({
+        where: {
+            id: iconid
+        }
+    });
+
+    return iconInfo;
+};
+
 export { 
     getUserByName,
     getUser, 
@@ -749,9 +831,9 @@ export {
     getAllUserRequests,
     getGroupChatMembers,
     getUserSentRequests,
-    getConvoMessages,
+    getConvoInfo,
     getGroupChatMessages,
-    getConvoMessagesFromId,
+    getConvoInfoFromId,
     checkIfGroupAdmin,
     createRequest,
     createUser,
@@ -780,4 +862,6 @@ export {
     checkIfInFriendship,
     getRequestInfo,
     checkIfUserInRequest,
+    searchForUsers,
+    getIconInfo,
 };

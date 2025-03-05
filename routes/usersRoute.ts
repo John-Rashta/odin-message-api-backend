@@ -1,11 +1,15 @@
 import { Router } from "express";
-import { signupUser, getUserInfo } from "../controllers/usersController";
-import { validateCredentials } from "../util/validators";
+import { signupUser, getUserInfo, updateProfile, getSelfInfo, searchUsers } from "../controllers/usersController";
+import { validateCredentials, validateOptionalCredentials, validateSearchUser, validateUserProfile } from "../util/validators";
 import { validationErrorMiddleware } from "../middleware/validationErrorMiddleware";
+import { isAuth } from "../middleware/authMiddleware";
 
 const usersRoute = Router();
 
 usersRoute.get("/", getUserInfo);
-usersRoute.post("/", validateCredentials, validationErrorMiddleware, signupUser);
+usersRoute.post("/", validateCredentials, validateUserProfile, validationErrorMiddleware, signupUser);
+usersRoute.put("/profile", isAuth, validateUserProfile, validateOptionalCredentials, validationErrorMiddleware, updateProfile);
+usersRoute.get("/profile", isAuth, getSelfInfo);
+usersRoute.get("/search", validateSearchUser, validationErrorMiddleware, searchUsers);
 
 export default usersRoute;
