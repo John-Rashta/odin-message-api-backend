@@ -11,7 +11,7 @@ const createGroup = asyncHandler(async(req, res) => {
     const formData = matchedData(req);
 
     const newGroup = await createGroupChat(req.user.id, (formData.name ? formData.name : "New Group"));
-    res.status(200).json(newGroup);
+    res.status(200).json({group: newGroup});
 
 });
 
@@ -23,7 +23,7 @@ const getGroups = asyncHandler(async(req, res) => {
 
     const groupsInfo = await getUserGroupsInfo(req.user.id);
 
-    res.status(200).json(groupsInfo);
+    res.status(200).json({groups: groupsInfo});
 });
 
 const getGroup = asyncHandler( async(req, res) => {
@@ -39,7 +39,7 @@ const getGroup = asyncHandler( async(req, res) => {
         return;
     };
 
-    res.status(200).json(groupInfo);
+    res.status(200).json({group: groupInfo});
 });
 
 const leaveGroup = asyncHandler(async(req, res) => {
@@ -131,7 +131,7 @@ const createMessageInGroup = asyncHandler(async(req, res) => {
         return;
     };
 
-    await createMessage(formData.content, req.user.id, Date(), {groupid: formData.groupid});
+    await createMessage(formData.content, req.user.id,  new Date(), {groupid: formData.groupid});
     res.status(200).json();
 });
 

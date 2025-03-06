@@ -24,7 +24,7 @@ interface UserProfile {
 interface UserSign extends UserProfile {
     username: string,
     password: string,
-    joinedAt: string,
+    joinedAt: Date,
 }
 
 interface UserUpdate extends UserProfile, UserOptions {

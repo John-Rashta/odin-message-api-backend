@@ -6,11 +6,11 @@ import { isAuth } from "../middleware/authMiddleware";
 
 const usersRoute = Router();
 
+usersRoute.get("/profile", isAuth, getSelfInfo);
+usersRoute.get("/search", validateSearchUser, validationErrorMiddleware, searchUsers);
 usersRoute.get("/:userid", isAuth, validateUUID("userid"), validationErrorMiddleware, getUserInfo);
 usersRoute.post("/", validateCredentials, validateUserProfile, validationErrorMiddleware, signupUser);
 usersRoute.put("/profile", isAuth, validateUserProfile, validateOptionalCredentials, validationErrorMiddleware, updateProfile);
-usersRoute.get("/profile", isAuth, getSelfInfo);
 usersRoute.get("/profile/icons", isAuth, getIcons);
-usersRoute.get("/search", validateSearchUser, validationErrorMiddleware, searchUsers);
 
 export default usersRoute;

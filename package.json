@@ -5,7 +5,7 @@
   "main": "app.ts",
   "scripts": {
     "dev": "NODE_ENV=development npx tsx app.ts",
-    "test": "NODE_ENV=test jest",
+    "test": "NODE_ENV=test jest --detectOpenHandles",
     "lint": "eslint ."
   },
   "author": "",

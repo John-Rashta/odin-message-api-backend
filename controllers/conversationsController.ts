@@ -15,7 +15,7 @@ const getConversations = asyncHandler(async(req, res) => {
         return;
     };
 
-    res.status(200).json(conversationsInfo);
+    res.status(200).json({conversations: conversationsInfo});
 });
 
 const getConversation = asyncHandler(async(req, res) => {
@@ -33,7 +33,7 @@ const getConversation = asyncHandler(async(req, res) => {
         return;
     };
 
-    res.status(200).json({conversationInfo});
+    res.status(200).json({conversation: conversationInfo});
 });
 
 const addMessageToConversation = asyncHandler(async(req, res) => {
@@ -55,7 +55,7 @@ const addMessageToConversation = asyncHandler(async(req, res) => {
             res.status(400).json();
             return;
         };
-        await createMessage(formData.content, req.user.id, Date(), {convoid: formData.conversationid});
+        await createMessage(formData.content, req.user.id, new Date(), {convoid: formData.conversationid});
         res.status(200).json();
         return;
     };
@@ -63,13 +63,13 @@ const addMessageToConversation = asyncHandler(async(req, res) => {
     const diferentCheckConvo = await checkIfConvoExistsByUsers(req.user.id, formData.targetid);
 
     if (diferentCheckConvo) {
-        await createMessage(formData.content, req.user.id, Date(), {convoid: formData.conversationid});
+        await createMessage(formData.content, req.user.id, new Date(), {convoid: formData.conversationid});
         res.status(200).json();
         return;
     };
 
     const convoInfo = await createConversation(req.user.id, formData.targetid);
-    await createMessage(formData.content, req.user.id, Date(), {convoid: convoInfo.id});
+    await createMessage(formData.content, req.user.id, new Date(), {convoid: convoInfo.id});
     res.status(200).json();
 });
 

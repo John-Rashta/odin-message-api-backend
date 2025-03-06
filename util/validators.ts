@@ -41,7 +41,7 @@ const validateOptionalUUID = (fieldname: string) => {
 const validateUserProfile = [
     body("name")
         .optional({ values: "falsy" })
-        .isAlpha().withMessage("Must only be words"),
+        .isAscii().withMessage("Must only be Ascii"),
     body("icon")
         .optional({ values: "falsy" })
         .isInt().withMessage("Must be an integer"),
@@ -56,8 +56,11 @@ const validateOptionalCredentials = [
         .isAlphanumeric().withMessage("Must only contain letters and/or numbers."),
     body("password").trim()
         .optional({ values: "falsy" })
+        .isAscii().withMessage("Must be only Ascii characters."),
+    body("oldPassword").trim()
+        .optional({ values: "falsy" })
         .isAscii().withMessage("Must be only Ascii characters.")
-];
+    ];
 
 const validateSearchUser = [
     query("user")

@@ -360,7 +360,7 @@ const checkOwnerOfMessage = async function checkIfUserOwnsMessage(userid: string
     return possibleMessage;
 };
 
-const createRequest = async function createRequestBetweenUsers(senderid: string, receiverid: string, type: Types, sentAt: string, groupid?: string) {
+const createRequest = async function createRequestBetweenUsers(senderid: string, receiverid: string, type: Types, sentAt: Date, groupid?: string) {
     const createdRequest = await prisma.requests.create({
         data: {
             receiver: {
@@ -465,7 +465,7 @@ const createFriendship = async function createFriendshipBetweenUsers(userAid: st
     return createdFriendship;
 };
 
-const createMessage = async function createMessageForGroupOrConvo(content: string, userid: string, sentAt: string, options: MessagesOptions) {
+const createMessage = async function createMessageForGroupOrConvo(content: string, userid: string, sentAt: Date, options: MessagesOptions) {
     const createdMessage = await prisma.messages.create({
         data: {
             sentAt,
@@ -909,9 +909,34 @@ const checkAndReturnGroup = async function checkIfInGroupAndReturnAllInfo(userid
     });
 
     return groupInfo;
-}
+};
+
+const getUserPassword = async function getUserHashedPassword(userid: string) {
+    const userPw = await prisma.user.findFirst({
+        where: {
+            id: userid,
+        },
+        select: {
+            password: true
+        }
+    });
+
+    return userPw;
+};
+
+////TEST/POOLING QUERIES ////
+const deleteEverything = async function deleteEverythingFromTestDatabase() {
+    await prisma.requests.deleteMany();
+    await prisma.messages.deleteMany();
+    await prisma.groupChat.deleteMany();
+    await prisma.conversations.deleteMany();
+    await prisma.friendships.deleteMany();
+    await prisma.session.deleteMany();
+    await prisma.user.deleteMany();
+};
 
 export {
+    getUserPassword,
     checkAndReturnGroup,
     getAllIconsInfo,
     getUserByName,
@@ -957,4 +982,5 @@ export {
     searchForUsers,
     getIconInfo,
     changeOnlineStatus,
+    deleteEverything,
 };

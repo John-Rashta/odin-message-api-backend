@@ -9,8 +9,8 @@ const groupsRoute = Router();
 groupsRoute.get("/", isAuth, getGroups);
 groupsRoute.get("/:groupid", isAuth, validateUUID("groupid"), validationErrorMiddleware, getGroup);
 groupsRoute.post("/", isAuth, validateGroupName, validationErrorMiddleware, createGroup);
+groupsRoute.post("/:groupid", isAuth, validateUUID("groupid"), validateMessage ,validationErrorMiddleware, createMessageInGroup);
 groupsRoute.post("/:groupid/leave", isAuth, validateUUID("groupid"), validationErrorMiddleware, leaveGroup);
 groupsRoute.put("/:groupid", isAuth, validateUUID("groupid"), validateGroupName, validateGroupUpdate, validationErrorMiddleware, updateGroup);
-groupsRoute.post("/:groupid", isAuth, validateUUID("groupid"), validateMessage ,validationErrorMiddleware, createMessageInGroup);
 
 export default groupsRoute;

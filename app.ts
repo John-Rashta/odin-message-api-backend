@@ -12,6 +12,8 @@ import usersRoute from "./routes/usersRoute";
 import requestsRoute from "./routes/requestsRoute";
 import friendsRoute from "./routes/friendsRoute";
 import conversationsRoute from "./routes/conversationsRoute";
+import groupsRoute from "./routes/groupsRoute";
+import messagesRoute from "./routes/messagesRoute";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,6 +46,8 @@ app.use("/users", usersRoute);
 app.use("/requests", requestsRoute);
 app.use("/friends", friendsRoute);
 app.use("/conversations", conversationsRoute);
+app.use("/messages", messagesRoute);
+app.use("groups", groupsRoute);
 
 app.use(errorHandler);
 

@@ -13,7 +13,7 @@ const getFriends = asyncHandler( async(req, res) => {
         res.status(200).json({message: "Empty Friendlist"});
         return;
     }
-    res.status(200).json(friendships);
+    res.status(200).json({friends: friendships});
 });
 
 const deleteFriend = asyncHandler(async(req, res) => {

@@ -14,7 +14,7 @@ const getRequests = asyncHandler(async(req, res) => {
         return;
     }
 
-    res.status(200).json(userRequests);
+    res.status(200).json({requests: userRequests});
 });
 
 const getRequest = asyncHandler(async(req, res) => {
@@ -34,7 +34,7 @@ const getRequest = asyncHandler(async(req, res) => {
         return;
     };
 
-    res.status(200).json(userRequest);
+    res.status(200).json({request: userRequest});
 });
 
 const makeRequest = asyncHandler(async(req, res) => {
@@ -66,7 +66,7 @@ const makeRequest = asyncHandler(async(req, res) => {
                 return;
             }
         }
-        await createRequest(req.user.id, formData.targetid, formData.type, Date(), formData.groupid || null);
+        await createRequest(req.user.id, formData.targetid, formData.type, new Date(), formData.groupid || null);
         res.status(200).json();
         return;
     };
