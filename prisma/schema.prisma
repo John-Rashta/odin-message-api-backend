@@ -18,7 +18,8 @@ model User {
   username String
   password String
   name String?
-  icon Int @default(1)
+  icon Icons @relation(fields: [iconid], references: [id])
+  iconid Int
   joinedAt DateTime
   aboutMe String?
   online Boolean @default(false)
@@ -85,6 +86,7 @@ model Session {
 
 model Icons {
   id Int @id @default(autoincrement())
+  users User[]
   source String
 }
 

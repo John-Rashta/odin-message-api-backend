@@ -43,6 +43,7 @@ const getUserFriends = async function getFriendsFromUserId(id: string) {
                             username: true,
                             id: true,
                             online: true,
+                            icon: true,
                         },
                         where: {
                             NOT: {
@@ -65,6 +66,7 @@ const getUserGroupsInfo = async function getUserGroupChatsFromId(id: string) {
         },
         select: {
             id: true,
+            name: true,
             groups: {
                 include: {
                     members: {
@@ -73,12 +75,6 @@ const getUserGroupsInfo = async function getUserGroupChatsFromId(id: string) {
                             username: true,
                         },
                     },
-                    admins: {
-                        select: {
-                            id: true,
-                            username: true,
-                        },
-                    }
                 }
             }
         }
@@ -395,7 +391,16 @@ const createRequest = async function createRequestBetweenUsers(senderid: string,
 const createUser = async function createUserWithUsernameAndPassword(options: UserSign) {
     const createdUser = await prisma.user.create({
         data: {
-            ...options
+            ...options,
+            ...(options.icon ? { icon: {
+                connect: {
+                    id: options.icon
+                }
+            }} : { icon: {
+                connect: {
+                    id: 1
+                }
+            }})
         }
     });
 
@@ -501,12 +506,20 @@ const updateMessage = async function updateMessageContent(messageid: string, con
 };
 
 const changeUserInfo = async function updateUserDetails(userid: string, options: UserUpdate ) {
+    const {icon, ...rest} = options;
     const updatedUser = await prisma.user.update({
         where: {
             id: userid,
         },
         data: {
-            ...options
+            ...rest,
+            ...(icon ? {
+                icon: {
+                    connect: {
+                        id: icon,
+                    }
+                }
+            }: {}),
         },
         select: {
             id: true,
@@ -813,6 +826,10 @@ const searchForUsers = async function searchForUsersByUsername(username: string)
             username: {
                 contains: username
             }
+        },
+        select: {
+            username: true,
+            id: true,
         }
     });
 
@@ -842,7 +859,61 @@ const changeOnlineStatus = async function changeOnlineStatusOfUser(userid: strin
     return userInfo;
 };
 
+const getAllIconsInfo = async function getAllIconsInfoFromDatabase() {
+    const iconsInfo = await prisma.icons.findMany();
+    return iconsInfo;
+};
+
+const checkAndReturnGroup = async function checkIfInGroupAndReturnAllInfo(userid: string, groupid: string) {
+    const groupInfo = await prisma.groupChat.findFirst({
+        where: {
+            id: groupid,
+            members: {
+                some: {
+                    id: userid
+                }
+            }
+        },
+        select: {
+            id: true,
+            members: {
+                select: {
+                    icon: true,
+                    username: true,
+                    id: true
+                }
+            },
+            admins: {
+                select: {
+                    icon: true,
+                    username: true,
+                    id: true
+                }
+            },
+            contents: {
+                select: {
+                    id: true,
+                    content: true,
+                    edited: true,
+                    sentAt: true,
+                    sender: {
+                        select: {
+                            id: true,
+                            username: true
+                        }
+                    },
+
+                }
+            }
+        }
+    });
+
+    return groupInfo;
+}
+
 export {
+    checkAndReturnGroup,
+    getAllIconsInfo,
     getUserByName,
     getUser, 
     getUserFriends, 

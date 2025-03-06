@@ -7,6 +7,7 @@ const getFriends = asyncHandler( async(req, res) => {
         res.status(400).json();
         return;
     };
+    
     const friendships = await getUserFriends(req.user.id);
     if (!friendships) {
         res.status(200).json({message: "Empty Friendlist"});

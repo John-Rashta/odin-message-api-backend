@@ -70,7 +70,7 @@ const addMessageToConversation = asyncHandler(async(req, res) => {
 
     const convoInfo = await createConversation(req.user.id, formData.targetid);
     await createMessage(formData.content, req.user.id, Date(), {convoid: convoInfo.id});
-    res.status(200).json(); 
+    res.status(200).json();
 });
 
 export { getConversations, getConversation, addMessageToConversation };

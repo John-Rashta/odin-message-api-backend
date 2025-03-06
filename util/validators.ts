@@ -61,6 +61,7 @@ const validateOptionalCredentials = [
 
 const validateSearchUser = [
     query("user")
+        .notEmpty()
         .isAscii().withMessage("Must be either an Username or an UUID")
 ];
 
@@ -68,6 +69,23 @@ const validateMessage = [
     body("content")
         .notEmpty()
         .isAscii().withMessage("Must be only Ascii characters.")
+]; 
+
+const validateGroupUpdate = [
+    body("targetid")
+        .optional({values: "falsy"})
+        .isUUID().withMessage("Must be an UUID"),
+    body("action")
+        .optional({values: "falsy"})
+        .isIn(["ADD", "REMOVE", "PROMOTE"]).withMessage("Types can only be ADD, REMOVE or PROMOTE"),
 ];
 
-export { validateMessage, validateSearchUser, validateCredentials, validateUUID, validateType, validateBodyUUID, validateRequestGroup, validateOptionalUUID, validateUserProfile, validateOptionalCredentials };
+const validateGroupName = [
+    body("name")
+    .optional({values: "falsy"})
+    .notEmpty()
+    .isAscii().withMessage("Must be either an Username or an UUID")
+
+]
+
+export { validateGroupName, validateGroupUpdate, validateMessage, validateSearchUser, validateCredentials, validateUUID, validateType, validateBodyUUID, validateRequestGroup, validateOptionalUUID, validateUserProfile, validateOptionalCredentials };

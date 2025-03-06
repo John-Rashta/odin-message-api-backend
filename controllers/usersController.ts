@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { matchedData } from "express-validator";
-import { changeUserInfo, checkIfFriendshipExists, checkIfUsernameAvailable, createUser, getIconInfo, getUser, searchForUsers } from "../util/queries";
+import { changeUserInfo, checkIfFriendshipExists, checkIfUsernameAvailable, createUser, getAllIconsInfo, getIconInfo, getUser, searchForUsers } from "../util/queries";
 import bcrypt from "bcryptjs";
 import isUUID from "validator/lib/isUUID";
 
@@ -40,8 +40,7 @@ const getUserInfo = asyncHandler(async(req, res) => {
         res.status(400).json();
         return;
     };
-    const iconInfo = await getIconInfo(userInfo.icon);
-    res.status(200).json({...userInfo, icon: iconInfo});
+    res.status(200).json(userInfo);
 });
 
 const updateProfile = asyncHandler(async(req, res) => {
@@ -83,9 +82,7 @@ const getSelfInfo = asyncHandler(async(req, res) => {
         return;
     };
 
-    const iconInfo = await getIconInfo(userInfo.icon);
-
-    res.status(200).json({...userInfo, icon: iconInfo});
+    res.status(200).json(userInfo);
 });
 
 const searchUsers = asyncHandler(async(req, res) => {
@@ -101,4 +98,13 @@ const searchUsers = asyncHandler(async(req, res) => {
     res.status(200).json(possibleUsers);
 });
 
-export { signupUser, getUserInfo, updateProfile, getSelfInfo, searchUsers };
+const getIcons = asyncHandler(async(req, res) => {
+    if (!req.user) {
+        res.status(400).json();
+        return;
+    };
+    const iconsInfo = await getAllIconsInfo();
+    res.status(200).json(iconsInfo);
+});
+
+export { signupUser, getUserInfo, updateProfile, getSelfInfo, searchUsers, getIcons };
