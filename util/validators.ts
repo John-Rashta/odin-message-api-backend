@@ -32,7 +32,7 @@ const validateRequestGroup = [
 
 const validateOptionalUUID = (fieldname: string) => {
     return [
-        param(fieldname)
+        body(fieldname)
             .optional({ values: "falsy" })
             .isUUID().withMessage("Must be an UUID")
     ]
@@ -80,7 +80,7 @@ const validateGroupUpdate = [
         .isUUID().withMessage("Must be an UUID"),
     body("action")
         .optional({values: "falsy"})
-        .isIn(["ADD", "REMOVE", "PROMOTE"]).withMessage("Types can only be ADD, REMOVE or PROMOTE"),
+        .isIn(["REMOVE", "PROMOTE", "DEMOTE"]).withMessage("Types can only be REMOVE, DEMOTE or PROMOTE"),
 ];
 
 const validateGroupName = [

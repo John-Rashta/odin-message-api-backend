@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-import { checkIfInFriendship, getUserFriends, deleteFriendship } from "../util/queries";
+import { getUserFriends, deleteFriendship, checkIfFriendshipExists } from "../util/queries";
 import { matchedData } from "express-validator";
 
 const getFriends = asyncHandler( async(req, res) => {
@@ -24,14 +24,14 @@ const deleteFriend = asyncHandler(async(req, res) => {
 
     const formData = matchedData(req);
 
-    const checkFriendship = await checkIfInFriendship(req.user.id, formData.friendshipid);
+    const checkFriendship = await checkIfFriendshipExists(req.user.id, formData.targetid);
 
     if (!checkFriendship) {
         res.status(400).json();
         return;
     };
 
-    await deleteFriendship(formData.friendshipid);
+    await deleteFriendship(checkFriendship.id);
 
     res.status(200).json();
 });

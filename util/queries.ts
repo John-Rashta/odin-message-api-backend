@@ -52,7 +52,9 @@ const getUserFriends = async function getFriendsFromUserId(id: string) {
                         }
                     }
                 }
-            }
+            },
+            username: true,
+            id: true,
         }
     });
 
@@ -151,6 +153,7 @@ const getAllUserRequests = async function getUserRequestsFromDatabase(id: string
                     },
                     sentAt: true,
                     type: true,
+                    id: true,
                 },
                 orderBy: {
                     sentAt: "desc"
@@ -550,14 +553,27 @@ const updateGroupInfo = async function updateGroupDetails(groupid: string, optio
                 [optionsManager[options.action]]: {
                     id: options.adminid
                 }
-            }}: typeof options.memberid === "string" && (options.action === "ADD" || options.action === "REMOVE") ? {members: {
+            }}: {}),
+            ...(typeof options.memberid === "string" && (options.action === "ADD" || options.action === "REMOVE") ? {members: {
                 [optionsManager[options.action]]: {
                     id: options.memberid
                 }
             }} : {}),
+        },
+        select: {
+            id: true,
+            members: {
+                select: {
+                    id: true
+                }
+            },
+            admins: {
+                select: {
+                    id: true
+                }
+            }
         }
     });
-
     return updatedGroup;
 };
 
@@ -753,6 +769,9 @@ const checkIfInConvo = async function checkIfUserInConversation(userid: string, 
         },
         select: {
             contents: {
+                orderBy: {
+                    sentAt: "asc"
+                },
                 select: {
                     sender: {
                         select: {
@@ -762,6 +781,7 @@ const checkIfInConvo = async function checkIfUserInConversation(userid: string, 
                     },
                     sentAt: true,
                     content: true,
+                    id: true,
                 }
             },
             id: true,
@@ -891,6 +911,9 @@ const checkAndReturnGroup = async function checkIfInGroupAndReturnAllInfo(userid
                 }
             },
             contents: {
+                orderBy: {
+                    sentAt: "asc"
+                },
                 select: {
                     id: true,
                     content: true,

@@ -15,7 +15,7 @@ const getConversations = asyncHandler(async(req, res) => {
         return;
     };
 
-    res.status(200).json({conversations: conversationsInfo});
+    res.status(200).json({user: conversationsInfo});
 });
 
 const getConversation = asyncHandler(async(req, res) => {

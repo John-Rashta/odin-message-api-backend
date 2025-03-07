@@ -2,7 +2,7 @@ import { Router } from "express";
 import { isAuth } from "../middleware/authMiddleware";
 import { validationErrorMiddleware } from "../middleware/validationErrorMiddleware";
 import { validateGroupName, validateGroupUpdate, validateMessage, validateUUID } from "../util/validators";
-import { createGroup, createMessageInGroup, getGroup, getGroups, leaveGroup, updateGroup } from "../controllers/groupsController";
+import { createGroup, createMessageInGroup, fullDeleteGroup, getGroup, getGroups, leaveGroup, updateGroup } from "../controllers/groupsController";
 
 const groupsRoute = Router();
 
@@ -12,5 +12,6 @@ groupsRoute.post("/", isAuth, validateGroupName, validationErrorMiddleware, crea
 groupsRoute.post("/:groupid", isAuth, validateUUID("groupid"), validateMessage ,validationErrorMiddleware, createMessageInGroup);
 groupsRoute.post("/:groupid/leave", isAuth, validateUUID("groupid"), validationErrorMiddleware, leaveGroup);
 groupsRoute.put("/:groupid", isAuth, validateUUID("groupid"), validateGroupName, validateGroupUpdate, validationErrorMiddleware, updateGroup);
+groupsRoute.delete("/:groupid", isAuth, validateUUID("groupid"), validationErrorMiddleware, fullDeleteGroup);
 
 export default groupsRoute;

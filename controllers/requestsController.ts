@@ -14,7 +14,7 @@ const getRequests = asyncHandler(async(req, res) => {
         return;
     }
 
-    res.status(200).json({requests: userRequests});
+    res.status(200).json({user: userRequests});
 });
 
 const getRequest = asyncHandler(async(req, res) => {
@@ -45,6 +45,11 @@ const makeRequest = asyncHandler(async(req, res) => {
     const formData = matchedData(req);
     const checkTarget = await getUser(formData.targetid);
     if(!checkTarget) {
+        res.status(400).json();
+        return;
+    };
+
+    if (formData.targetid === req.user.id) {
         res.status(400).json();
         return;
     };
@@ -87,6 +92,7 @@ const updateRequest = asyncHandler(async(req, res) => {
     };
     if (requestInfo.type === "FRIEND") {
         await createFriendship(requestInfo.senderid, requestInfo.receiverid);
+        await deleteRequest(formData.requestid); 
         res.status(200).json();
         return;
     } else if (requestInfo.type === "GROUP") {
@@ -100,6 +106,7 @@ const updateRequest = asyncHandler(async(req, res) => {
             return;
         };
         await updateGroupInfo(requestInfo.groupid, {memberid: req.user.id, action: "ADD"});
+        await deleteRequest(formData.requestid);
         res.status(200).json();
         return;
     };

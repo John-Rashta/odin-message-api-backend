@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-import { checkAndReturnGroup, checkIfGroupAdmin, checkIfGroupMember, createGroupChat, createMessage, getUser, getUserGroupsInfo, updateGroupInfo } from "../util/queries";
+import { checkAndReturnGroup, checkIfGroupAdmin, checkIfGroupMember, createGroupChat, createMessage, deleteGroup, getUser, getUserGroupsInfo, updateGroupInfo } from "../util/queries";
 import { matchedData } from "express-validator";
 
 const createGroup = asyncHandler(async(req, res) => {
@@ -23,7 +23,7 @@ const getGroups = asyncHandler(async(req, res) => {
 
     const groupsInfo = await getUserGroupsInfo(req.user.id);
 
-    res.status(200).json({groups: groupsInfo});
+    res.status(200).json({user: groupsInfo});
 });
 
 const getGroup = asyncHandler( async(req, res) => {
@@ -55,9 +55,10 @@ const leaveGroup = asyncHandler(async(req, res) => {
         res.status(400).json();
         return;
     };
-
-    await updateGroupInfo(formData.groupid, {action: "REMOVE", adminid: req.user.id, memberid: req.user.id});
-
+    const groupInfo = await updateGroupInfo(formData.groupid, {action: "REMOVE", adminid: req.user.id, memberid: req.user.id});
+    if (groupInfo.members.length < 1) {
+        await deleteGroup(formData.groupid);
+    };
     res.status(200).json();
 });
 
@@ -84,6 +85,18 @@ const updateGroup = asyncHandler(async(req, res) => {
         }
     }
 
+    if (formData.action === "DEMOTE" && formData.targetid) {
+        const checkIfAdmin = await checkIfGroupAdmin(formData.targetid, formData.groupid);
+        if (!checkIfAdmin) {
+            res.status(400).json();
+            return;
+        };
+
+        await updateGroupInfo(formData.groupid, {adminid: formData.targetid, action:"REMOVE"});
+        res.status(200).json();
+        return;
+    }
+
     if (formData.action  === "PROMOTE" && formData.targetid) {
         const checkIfMember = await checkIfGroupMember(formData.targetid, formData.groupid);
 
@@ -97,14 +110,17 @@ const updateGroup = asyncHandler(async(req, res) => {
         return;
     };
 
-    if ((formData.action === "ADD" || formData.action === "REMOVE") && formData.targetid) {
-        await updateGroupInfo(formData.groupid, 
+    if (formData.action === "REMOVE" && formData.targetid) {
+        const groupInfo = await updateGroupInfo(formData.groupid, 
         {
             memberid: formData.targetid,
             action: formData.action,
             ...(formData.name ? { name: formData.name } : {}),
-            ...(formData.action === "REMOVE" ? {adminid: formData.targetid,} : {})
+            adminid: formData.targetid,
         });
+        if (groupInfo.members.length < 1) {
+            await deleteGroup(formData.groupid);
+        };
         res.status(200).json();
         return;
     };
@@ -135,4 +151,22 @@ const createMessageInGroup = asyncHandler(async(req, res) => {
     res.status(200).json();
 });
 
-export { getGroups, getGroup, leaveGroup, updateGroup, createMessageInGroup, createGroup };
+const fullDeleteGroup = asyncHandler(async(req, res) => {
+    if (!req.user) {
+        res.status(400).json();
+        return;
+    };
+
+    const formData = matchedData(req);
+    const checkIfAdmin = await checkIfGroupAdmin(req.user.id, formData.groupid);
+
+    if (!checkIfAdmin) {
+        res.status(400).json();
+        return;
+    };
+
+    await deleteGroup(formData.groupid);
+    res.status(200).json();
+});
+
+export { getGroups, getGroup, leaveGroup, updateGroup, createMessageInGroup, createGroup, fullDeleteGroup };

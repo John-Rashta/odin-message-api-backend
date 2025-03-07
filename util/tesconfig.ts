@@ -45,7 +45,7 @@ app.use("/requests", requestsRoute);
 app.use("/friends", friendsRoute);
 app.use("/conversations", conversationsRoute);
 app.use("/messages", messagesRoute);
-app.use("groups", groupsRoute);
+app.use("/groups", groupsRoute);
 
 app.use(errorHandler);
 
