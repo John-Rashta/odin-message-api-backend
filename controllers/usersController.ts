@@ -61,6 +61,14 @@ const updateProfile = asyncHandler(async(req, res) => {
         };
     };
 
+    if (formData.username) {
+        const alreadyUsed = await checkIfUsernameAvailable(formData.username);
+        if (alreadyUsed){
+            res.status(400).json({message: "Invalid Username"});
+            return;
+        }
+    };
+
     if (formData.password && !formData.oldPassword || formData.oldPassword && !formData.password) {
         res.status(400).json({message: "Missing either old or new password"});
         return;
@@ -92,15 +100,8 @@ const updateProfile = asyncHandler(async(req, res) => {
             };
         });
         return;
-    } else if (formData.username) {
-        const alreadyUsed = await checkIfUsernameAvailable(formData.username);
-        if (alreadyUsed){
-            res.status(400).json({message: "Invalid Username"});
-            return;
-        }
     };
     await changeUserInfo(req.user.id, formData);
-
     res.status(200).json();
     return;
 });
