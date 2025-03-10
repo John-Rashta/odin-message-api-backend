@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { matchedData } from "express-validator";
-import { checkIfUserInRequest, getAllUserRequests, getRequestInfo, createRequest, getUser, deleteRequest, checkIfUserRoleInRequest, createFriendship, checkIfGroupMember, updateGroupInfo, checkIfFriendshipExists, findIfRequestExists } from "../util/queries";
+import { checkIfUserInRequest, getAllUserRequests, getRequestInfo, createRequest, getUser, deleteRequest, checkIfUserRoleInRequest, createFriendship, checkIfGroupMember, updateGroupInfo, checkIfFriendshipExists, findIfRequestExists, checkIfGroupAdmin } from "../util/queries";
 
 const getRequests = asyncHandler(async(req, res) => {
     if (!req.user) {
@@ -25,7 +25,7 @@ const getRequest = asyncHandler(async(req, res) => {
     const formData = matchedData(req);
     const checkRequest = await checkIfUserInRequest(req.user.id, formData.requestid);
     if (!checkRequest) {
-        res.status(401).json();
+        res.status(400).json();
         return;
     }
     const userRequest = await getRequestInfo(formData.requestid);
@@ -61,9 +61,21 @@ const makeRequest = asyncHandler(async(req, res) => {
     };
     if (formData.type === "FRIEND" || formData.type === "GROUP" ) {
         if (formData.type === "GROUP" && !formData.groupid) {
-            res.status(400).json();
+            res.status(400).json({message: "GroupId Required for Group Requests"});
             return;
         };
+        if (formData.groupid) {
+            const isAdmin = await checkIfGroupAdmin(req.user.id, formData.groupid);
+            if (!isAdmin) {
+                res.status(400).json({message: "Only Admins Can Invite"});
+                return;
+            }
+            const alreadyMember = await checkIfGroupMember(formData.targetid, formData.groupid);
+            if (alreadyMember) {
+                res.status(400).json({message: "Already a Member"});
+                return;
+            }
+        }
         if (formData.type === "FRIEND") {
             const checkIfFriends = await checkIfFriendshipExists(req.user.id, formData.targetid);
             if (checkIfFriends) {
@@ -102,6 +114,7 @@ const updateRequest = asyncHandler(async(req, res) => {
         };
         const checkIfAlreadyIn = await checkIfGroupMember(req.user.id, requestInfo.groupid);
         if (checkIfAlreadyIn) {
+            await deleteRequest(formData.requestid); 
             res.status(400).json();
             return;
         };

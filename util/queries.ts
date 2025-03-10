@@ -68,7 +68,7 @@ const getUserGroupsInfo = async function getUserGroupChatsFromId(id: string) {
         },
         select: {
             id: true,
-            name: true,
+            username: true,
             groups: {
                 include: {
                     members: {

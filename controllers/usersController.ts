@@ -8,7 +8,7 @@ const signupUser = asyncHandler(async (req, res) => {
     const formData = matchedData(req);
     const invalidUser = await checkIfUsernameAvailable(formData.username);
     if (invalidUser) {
-        res.status(404).json({message: "Unavailable Username"});
+        res.status(400).json({message: "Unavailable Username"});
         return;
     };
 
@@ -56,7 +56,7 @@ const updateProfile = asyncHandler(async(req, res) => {
     if (formData.icon) {
         const checkIcon = await getIconInfo(formData.icon);
         if (!checkIcon) {
-            res.status(400).json();
+            res.status(400).json({message: "Invalid Icon Id"});
             return;
         };
     };
@@ -80,7 +80,7 @@ const updateProfile = asyncHandler(async(req, res) => {
             res.status(400).json();
             return;
         }
-        const match = bcrypt.compare(formData.oldPassword, userPw.password);
+        const match = await bcrypt.compare(formData.oldPassword, userPw.password);
         if (!match) {
             res.status(400).json({message: "Wrong old password"});
             return;

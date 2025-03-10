@@ -9,7 +9,7 @@ const updateUserMessage = asyncHandler(async(req, res) => {
     };
 
     const formData = matchedData(req);
-    const possibleMessage = checkOwnerOfMessage(req.user.id, formData.messageid);
+    const possibleMessage = await checkOwnerOfMessage(req.user.id, formData.messageid);
 
     if (!possibleMessage) {
         res.status(400).json();
@@ -27,7 +27,7 @@ const deleteUserMessage = asyncHandler(async(req, res) => {
     };
 
     const formData = matchedData(req);
-    const possibleMessage = checkOwnerOfMessage(req.user.id, formData.messageid);
+    const possibleMessage = await checkOwnerOfMessage(req.user.id, formData.messageid);
 
     if (!possibleMessage) {
         res.status(400).json();

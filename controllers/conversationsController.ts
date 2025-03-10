@@ -11,7 +11,7 @@ const getConversations = asyncHandler(async(req, res) => {
     const conversationsInfo = await getUserConversationsInfo(req.user.id);
     
     if  (!conversationsInfo) {
-        res.status(200).json({message: "No Conversations Yet"});
+        res.status(400).json();
         return;
     };
 
@@ -63,7 +63,7 @@ const addMessageToConversation = asyncHandler(async(req, res) => {
     const diferentCheckConvo = await checkIfConvoExistsByUsers(req.user.id, formData.targetid);
 
     if (diferentCheckConvo) {
-        await createMessage(formData.content, req.user.id, new Date(), {convoid: formData.conversationid});
+        await createMessage(formData.content, req.user.id, new Date(), {convoid: diferentCheckConvo.id});
         res.status(200).json();
         return;
     };

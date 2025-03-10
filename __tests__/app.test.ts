@@ -4,13 +4,17 @@ import { deleteEverything } from '../util/queries';
 
 const server = app.listen();
 
+const testUUID = "1d9011dc-ca50-46c4-97f3-5837e08bcc22";
+
 afterAll(() => {
     return Promise.all([new Promise((resolve) => resolve(storeStuff.shutdown())),new Promise((resolve) => resolve(server.close())),deleteEverything()]);
   });
 
+  ///DOING ERRORS HERE SINCE MOST ARE PART OF NORMAL FUNCTIONALITY WHILE LOGGED IN OR AFTER VALID OPERATIONS
 describe("Basic API functionality", () => {
     const userOne = request.agent(server);
     const userTwo = request.agent(server);
+    const userError = request.agent(server);
     const userTwoInfo : {
         id?: string,
         requestid?: string,
@@ -24,6 +28,7 @@ describe("Basic API functionality", () => {
         groupid?: string,
         convoid?: string,
     } = {};
+
     test("create User", done => {
         userOne
             .post("/users")
@@ -33,7 +38,8 @@ describe("Basic API functionality", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200, done)
-    })  
+    })
+
     test("create second user", done => {
         userTwo
             .post("/users")
@@ -43,6 +49,18 @@ describe("Basic API functionality", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200, done)
+    })
+
+    ///ERROR TEST
+    test("cant create user with same username", done => {
+        userError
+        .post("/users")
+        .send({
+            username: "darkMagician",
+            password: "klll12"
+        })
+        .expect("Content-Type", /json/)
+        .expect(400, done)
     })
 
     test("login user", done  => {
@@ -90,6 +108,96 @@ describe("Basic API functionality", () => {
                 done();
             });
     });
+
+    ///ERROR TEST
+    test("cant get user that doesn't exist", done => {
+        userOne
+            .get(`/users/${testUUID}`)
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
+    ///ERROR TEST
+    test("can't update with an invalid icon id", done => {
+        userOne
+            .put(`/users/profile`)
+            .send({
+                icon: 25,
+            })
+            .expect("Content-Type", /json/)
+            .expect({message: "Invalid Icon Id"})
+            .expect(400, done)
+    });
+
+    ///ERROR TEST
+    test("can't update with an already used username", done => {
+        userOne
+            .put(`/users/profile`)
+            .send({
+                username: "garrosh",
+            })
+            .expect("Content-Type", /json/)
+            .expect({message: "Invalid Username"})
+            .expect(400, done)
+    });
+
+    ///ERROR TEST
+    test("can't update if one of the passwords is missing", done => {
+        userOne
+            .put(`/users/profile`)
+            .send({
+                password: "123"
+            })
+            .expect("Content-Type", /json/)
+            .expect({message: "Missing either old or new password"})
+            .expect(400, done)
+    });
+
+    ///ERROR TEST
+    test("can't update if passwords don't match", done => {
+        userOne
+            .put(`/users/profile`)
+            .send({
+                oldPassword: "1235jhh",
+                password: "ggg",
+            })
+            .expect("Content-Type", /json/)
+            .expect({message: "Wrong old password"})
+            .expect(400, done)
+    });
+
+    ///ERROR TEST
+    test("can't get request if it doesn't exist or is not part of it", done => {
+        userOne
+            .get(`/requests/${testUUID}`)
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
+     ///ERROR TEST
+    test("can't send invite to an user that doesn't exist", done => {
+        userOne
+            .post("/requests")
+            .send({
+                type: "FRIEND",
+                targetid: testUUID,
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
+     ///ERROR TEST
+    test("can't send invite to himself", done => {
+        userOne
+            .post("/requests")
+            .send({
+                type: "FRIEND",
+                targetid: userOneInfo.id,
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
     
     test("get user", done => {
         userOne
@@ -102,6 +210,15 @@ describe("Basic API functionality", () => {
             });
     });
 
+    ///ERROR TEST
+    test("can't delete friendship that doesn't exist", done => {
+        userOne
+            .delete(`/friends/${userTwoInfo.id}`)
+            .expect("Content-Type", /json/)
+            .expect({message: "Friendship doesn't exist"})
+            .expect(400, done)
+    })
+
     test("send friendrequest", done => {
         userOne
             .post("/requests")
@@ -111,6 +228,27 @@ describe("Basic API functionality", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200, done)
+    })
+
+    ///ERROR TEST
+    test("can't send request twice", done => {
+        userOne
+            .post("/requests")
+            .send({
+                type: "FRIEND",
+                targetid: userTwoInfo.id,
+            })
+            .expect("Content-Type", /json/)
+            .expect({message: "Request Already Sent"})
+            .expect(400, done)
+    })
+
+    ///ERROR TEST
+    test("can't accept own request", done => {
+        userOne
+            .put(`/requests/${userTwoInfo.requestid}`)
+            .expect("Content-Type", /json/)
+            .expect(400, done)
     })
 
     test("get requests", done => {
@@ -153,6 +291,19 @@ describe("Basic API functionality", () => {
                 expect(res.body).toHaveProperty("friends");
                 done();
             });
+    })
+
+    ///ERROR TEST
+    test("Can't send friend request if already friends", done => {
+        userOne
+            .post("/requests")
+            .send({
+                type: "FRIEND",
+                targetid: userTwoInfo.id,
+            })
+            .expect("Content-Type", /json/)
+            .expect({message: "Already Friends"})
+            .expect(400, done)
     })
     
     test("get icons", done => {
@@ -204,6 +355,31 @@ describe("Basic API functionality", () => {
             .expect(200, done)
     })
 
+    ///ERROR TEST
+    test("can't start conversation with a user that doesn't exist", done => {
+        userOne
+            .post("/conversations")
+            .send({
+                targetid: testUUID,
+                content: "HELLO WORLD !"
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
+    ///ERROR TEST
+    test("can't start conversation or add to conversation if given conversationid is wrong(isn't in that convo or doesn't exist)", done => {
+        userOne
+            .post("/conversations")
+            .send({
+                targetid: testUUID,
+                content: "HELLO WORLD !",
+                conversationid: testUUID,
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
     test("get conversations", done => {
         userOne
             .get("/conversations")
@@ -228,6 +404,37 @@ describe("Basic API functionality", () => {
             });
     });
 
+    test("sends message in conversation when conversationid is provided", done => {
+        userTwo
+            .post("/conversations")
+            .send({
+                targetid: userOneInfo.id,
+                content: "HELLO WORLD !",
+                conversationid: userOneInfo.convoid
+            })
+            .expect("Content-Type", /json/)
+            .expect(200, done)
+    })
+
+    ///ERROR TEST
+    test("can't get a conversation that doesn't exist/isn't in", done => {
+        userOne
+            .get(`/conversations/${testUUID}`)
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    });
+
+    ///ERROR TEST
+    test("can't edit message you don't own", done => {
+        userOne
+            .put(`/messages/${userTwoInfo.messageid}`)
+            .send({
+                content: "GOODBYE MINE?"
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    });
+
     test("edit message", done => {
         userTwo
             .put(`/messages/${userTwoInfo.messageid}`)
@@ -237,6 +444,14 @@ describe("Basic API functionality", () => {
             .expect("Content-Type", /json/)
             .expect(200, done)
     });
+
+    ///ERROR TEST
+    test("can't delete message you don't own", done => {
+        userOne
+            .delete(`/messages/${userTwoInfo.messageid}`)
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
 
     test("delete message", done => {
         userTwo
@@ -268,6 +483,14 @@ describe("Basic API functionality", () => {
             });
     })
 
+    ///ERROR TEST
+    test("can't get group that doesn't exist", done => {
+        userOne
+            .get(`/groups/${testUUID}`)
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
     test("get groups", done => {
         userOne
             .get(`/groups`)
@@ -277,6 +500,52 @@ describe("Basic API functionality", () => {
                 expect(res.body).toHaveProperty("user");
                 done();
             });
+    })
+
+    ///ERROR TEST
+    test("can't invite without being admin", done => {
+        userTwo
+        .post("/requests")
+        .send({
+            type: "GROUP",
+            targetid: userOneInfo.id,
+            groupid: userOneInfo.groupid,
+        })
+        .expect("Content-Type", /json/)
+        .expect({message: "Only Admins Can Invite"})
+        .expect(400, done)
+    })
+
+    ///ERROR TEST
+    test("Can't invite without group id", done => {
+        userOne
+            .post("/requests")
+            .send({
+                type: "GROUP",
+                targetid: userTwoInfo.id,
+            })
+            .expect("Content-Type", /json/)
+            .expect({message: "GroupId Required for Group Requests"})
+            .expect(400, done)
+    })
+
+    ///ERROR TEST
+    test("can't leave group you aren't in", done => {
+        userTwo
+            .post(`/groups/${userOneInfo.groupid}/leave`)
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
+    ///ERROR TEST
+    test("can't send message in a group you aren't in", done => {
+        userTwo
+            .post(`/groups/${userOneInfo.groupid}`)
+            .send({
+                content: "lepsaum asdsaofa ft."
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
     })
 
     test("invite to group", done => {
@@ -304,6 +573,18 @@ describe("Basic API functionality", () => {
             
     })
 
+    ///ERROR TEST
+    test("can't promote someone not in group", done => {
+        userOne
+            .put(`/groups/${userOneInfo.groupid}`)
+            .send({
+                targetid: userTwoInfo.id,
+                action: "PROMOTE"
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
     test("accept invite to group", done => {
         userTwo
             .put(`/requests/${userTwoInfo.grouprequestid}`)
@@ -321,6 +602,31 @@ describe("Basic API functionality", () => {
             .expect(200, done)
     })
 
+    ///ERROR TEST
+    test("can't invite if already a member", done => {
+        userOne
+            .post("/requests")
+            .send({
+                type: "GROUP",
+                targetid: userTwoInfo.id,
+                groupid: userOneInfo.groupid,
+            })
+            .expect("Content-Type", /json/)
+            .expect({message: "Already a Member"})
+            .expect(400, done)
+    })
+
+    ///ERROR TEST
+    test("can't update group if not an Admin", done => {
+        userTwo
+            .put(`/groups/${userOneInfo.groupid}`)
+            .send({
+                name: "vip gang"
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
     test("change group name", done => {
         userOne
             .put(`/groups/${userOneInfo.groupid}`)
@@ -329,6 +635,30 @@ describe("Basic API functionality", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200, done)
+    })
+
+    ///ERROR TEST
+    test("can't promote or demote someone that doesn't exist", done => {
+        userOne
+            .put(`/groups/${userOneInfo.groupid}`)
+            .send({
+                targetid: testUUID,
+                action: "PROMOTE"
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
+    })
+
+    ///ERROR TEST
+    test("can't demote if user not an admin already", done  => {
+        userOne
+            .put(`/groups/${userOneInfo.groupid}`)
+            .send({
+                targetid: userTwoInfo.id,
+                action: "DEMOTE"
+            })
+            .expect("Content-Type", /json/)
+            .expect(400, done)
     })
 
     test("promote in group", done => {
@@ -394,6 +724,14 @@ describe("Basic API functionality", () => {
             .put(`/requests/${userTwoInfo.secondgrouprequestid}`)
             .expect("Content-Type", /json/)
             .expect(200, done)
+    })
+
+    ///ERROR TEST
+    test("can't delete group you aren't admin of", done => {
+        userTwo
+            .delete(`/groups/${userOneInfo.groupid}`)
+            .expect("Content-Type", /json/)
+            .expect(400, done)
     })
 
     test("leave group", done => {

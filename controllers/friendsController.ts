@@ -10,7 +10,7 @@ const getFriends = asyncHandler( async(req, res) => {
     
     const friendships = await getUserFriends(req.user.id);
     if (!friendships) {
-        res.status(200).json({message: "Empty Friendlist"});
+        res.status(400).json();
         return;
     }
     res.status(200).json({friends: friendships});
@@ -27,7 +27,7 @@ const deleteFriend = asyncHandler(async(req, res) => {
     const checkFriendship = await checkIfFriendshipExists(req.user.id, formData.targetid);
 
     if (!checkFriendship) {
-        res.status(400).json();
+        res.status(400).json({message: "Friendship doesn't exist"});
         return;
     };
 

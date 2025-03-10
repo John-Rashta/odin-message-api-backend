@@ -82,8 +82,15 @@ const updateGroup = asyncHandler(async(req, res) => {
         if (!checkTarget) {
             res.status(400).json();
             return;
-        }
-    }
+        };
+
+        const checkMember = await checkIfGroupMember(formData.targetid, formData.groupid);
+
+        if (!checkMember) {
+            res.status(400).json();
+            return;
+        };
+    };
 
     if (formData.action === "DEMOTE" && formData.targetid) {
         const checkIfAdmin = await checkIfGroupAdmin(formData.targetid, formData.groupid);
@@ -98,13 +105,6 @@ const updateGroup = asyncHandler(async(req, res) => {
     }
 
     if (formData.action  === "PROMOTE" && formData.targetid) {
-        const checkIfMember = await checkIfGroupMember(formData.targetid, formData.groupid);
-
-        if (!checkIfMember) {
-            res.status(400).json({message: "Can't promote non-members"});
-            return;
-        };
-
         await updateGroupInfo(formData.groupid, {adminid: formData.targetid, action: "ADD", ...(formData.name ? { name: formData.name } : {})});
         res.status(200).json();
         return;
