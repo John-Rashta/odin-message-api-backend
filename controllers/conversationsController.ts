@@ -42,11 +42,13 @@ const addMessageToConversation = asyncHandler(async(req, res) => {
         return;
     };
     const formData = matchedData(req);
-    const checkTarget = await getUser(formData.targetid);
+    if (formData.targetid) {
+        const checkTarget = await getUser(formData.targetid);
 
-    if (!checkTarget) {
-        res.status(400).json();
-        return;
+        if (!checkTarget) {
+            res.status(400).json();
+            return;
+        };
     };
 
     if (formData.conversationid) {
@@ -70,7 +72,26 @@ const addMessageToConversation = asyncHandler(async(req, res) => {
 
     const convoInfo = await createConversation(req.user.id, formData.targetid);
     await createMessage(formData.content, req.user.id, new Date(), {convoid: convoInfo.id});
-    res.status(200).json();
+    res.status(200).json({message: "New Conversation"});
 });
 
-export { getConversations, getConversation, addMessageToConversation };
+const createConvo = asyncHandler(async(req, res) => {
+    if (!req.user) {
+        res.status(400).json();
+        return;
+    };
+
+    const formData = matchedData(req);
+    const checkTarget = await getUser(formData.targetid);
+
+    if (!checkTarget) {
+        res.status(400).json();
+        return;
+    };
+
+    const newConvo = await createConversation(req.user.id, formData.targetid);
+    res.status(200).json({group: newConvo.id});
+    return;
+});
+
+export { getConversations, getConversation, addMessageToConversation, createConvo };
