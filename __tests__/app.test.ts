@@ -264,6 +264,18 @@ describe("Basic API functionality", () => {
             
     })
 
+    test("get sent requests", done => {
+        userOne
+            .get("/requests/sent")
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .then((res) => {
+                expect(res.body).toHaveProperty("user");
+                done();
+            });
+            
+    });
+
     test("get request", done => {
         userTwo
             .get(`/requests/${userTwoInfo.requestid}`)
@@ -344,7 +356,21 @@ describe("Basic API functionality", () => {
             .expect(200, done)
     });
 
-    test("start conversation", done => {
+    test("create conversation", done => {
+        userTwo
+            .post("/conversations/create")
+            .send({
+                targetid: userOneInfo.id
+            })
+            .expect("Content-Type", /json/)
+        .expect(200)
+        .then((res) => {
+            expect(res.body).toHaveProperty("conversation");
+            done();
+          });
+    });
+
+    test("send message in conversation", done => {
         userTwo
             .post("/conversations")
             .send({

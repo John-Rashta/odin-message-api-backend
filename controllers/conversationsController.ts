@@ -90,7 +90,7 @@ const createConvo = asyncHandler(async(req, res) => {
     };
 
     const newConvo = await createConversation(req.user.id, formData.targetid);
-    res.status(200).json({group: newConvo.id});
+    res.status(200).json({conversation: newConvo.id});
     return;
 });
 

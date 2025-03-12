@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { matchedData } from "express-validator";
-import { checkIfUserInRequest, getAllUserRequests, getRequestInfo, createRequest, getUser, deleteRequest, checkIfUserRoleInRequest, createFriendship, checkIfGroupMember, updateGroupInfo, checkIfFriendshipExists, findIfRequestExists, checkIfGroupAdmin } from "../util/queries";
+import { checkIfUserInRequest, getAllUserRequests, getRequestInfo, createRequest, getUser, deleteRequest, checkIfUserRoleInRequest, createFriendship, checkIfGroupMember, updateGroupInfo, checkIfFriendshipExists, findIfRequestExists, checkIfGroupAdmin, getUserSentRequests } from "../util/queries";
 
 const getRequests = asyncHandler(async(req, res) => {
     if (!req.user) {
@@ -15,6 +15,22 @@ const getRequests = asyncHandler(async(req, res) => {
     }
 
     res.status(200).json({user: userRequests});
+});
+
+const getSentRequests = asyncHandler(async(req, res) => {
+    if (!req.user) {
+        res.status(400).json();
+        return;
+    };
+
+    const userSentRequests = await getUserSentRequests(req.user.id);
+
+    if (!userSentRequests) {
+        res.status(400).json();
+        return;
+    };
+
+    res.status(200).json({user: userSentRequests});
 });
 
 const getRequest = asyncHandler(async(req, res) => {
@@ -142,4 +158,4 @@ const deleteRequestPending = asyncHandler(async(req, res) => {
     res.status(200).json();
 });
 
-export { getRequest, getRequests, makeRequest, deleteRequestPending, updateRequest };
+export { getRequest, getRequests, makeRequest, deleteRequestPending, updateRequest, getSentRequests };
