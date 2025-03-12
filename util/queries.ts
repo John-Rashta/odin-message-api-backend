@@ -850,6 +850,10 @@ const searchForUsers = async function searchForUsersByUsername(username: string)
         select: {
             username: true,
             id: true,
+            joinedAt: true,
+            icon: true,
+            name: true,
+            aboutMe: true,
         }
     });
 
