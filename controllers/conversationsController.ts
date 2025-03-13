@@ -89,6 +89,13 @@ const createConvo = asyncHandler(async(req, res) => {
         return;
     };
 
+    const checkConvo = await checkIfConvoExistsByUsers(req.user.id, formData.targetid);
+
+    if (checkConvo) {
+        res.status(200).json({conversation: checkConvo.id});
+        return;
+    }
+
     const newConvo = await createConversation(req.user.id, formData.targetid);
     res.status(200).json({conversation: newConvo.id});
     return;
