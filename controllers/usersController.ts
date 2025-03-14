@@ -3,7 +3,7 @@ import { matchedData } from "express-validator";
 import { changeUserInfo, checkIfFriendshipExists, checkIfUsernameAvailable, createUser, deleteCustomIcon, getAllIconsInfo, getIconInfo, getUser, getUserPassword, searchForUsers } from "../util/queries";
 import bcrypt from "bcryptjs";
 import isUUID from "validator/lib/isUUID";
-import { deleteFiles, deleteLocalFile, uploadFile } from "../util/helperFunctions";
+import { deleteFiles, deleteLocalFile, uploadFile, clearFilesIfError } from "../util/helperFunctions";
 import { UploadApiResponse } from "cloudinary";
 
 const signupUser = asyncHandler(async (req, res) => {
@@ -72,14 +72,14 @@ const updateProfile = asyncHandler(async(req, res) => {
     if (formData.username) {
         const alreadyUsed = await checkIfUsernameAvailable(formData.username);
         if (alreadyUsed){
-            await deleteLocalFile(req.file);
+            await clearFilesIfError(req.file, fileInfo);
             res.status(400).json({message: "Invalid Username"});
             return;
         }
     };
 
     if (formData.password && !formData.oldPassword || formData.oldPassword && !formData.password) {
-        await deleteLocalFile(req.file);
+        await clearFilesIfError(req.file, fileInfo);
         res.status(400).json({message: "Missing either old or new password"});
         return;
     };
@@ -87,20 +87,20 @@ const updateProfile = asyncHandler(async(req, res) => {
     if (formData.password && formData.oldPassword) {
         const userPw = await getUserPassword(req.user.id);
         if  (!userPw) {
-            await deleteLocalFile(req.file);
+            await clearFilesIfError(req.file, fileInfo);
             res.status(400).json();
             return;
         }
         const match = await bcrypt.compare(formData.oldPassword, userPw.password);
         if (!match) {
-            await deleteLocalFile(req.file);
+            await clearFilesIfError(req.file, fileInfo);;
             res.status(400).json({message: "Wrong old password"});
             return;
         };
         bcrypt.hash(formData.password, 10, async (err, hashedPassword) => {
             if (err) {
                 console.log(err);
-                await deleteLocalFile(req.file);
+                await clearFilesIfError(req.file, fileInfo);
                 res.status(500).json({message: "Internal Error"});
                 return;
             }

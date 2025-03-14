@@ -520,11 +520,11 @@ const createFriendship = async function createFriendshipBetweenUsers(userAid: st
     return createdFriendship;
 };
 
-const createMessage = async function createMessageForGroupOrConvo(content: string, userid: string, sentAt: Date, options: MessagesOptions) {
+const createMessage = async function createMessageForGroupOrConvo(userid: string, sentAt: Date, options: MessagesOptions) {
     const createdMessage = await prisma.messages.create({
         data: {
             sentAt,
-            content,
+            ...(typeof options.content === "string" ? {content: options.content} : {}),
             sender: {
                 connect: {
                     id: userid,

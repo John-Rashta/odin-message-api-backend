@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import { matchedData } from "express-validator";
 import { checkIfInConvo, getUserConversationsInfo, getUser, checkIfConvoExistsByUsers, createMessage, createConversation } from "../util/queries";
-import { deleteLocalFile, uploadFile } from "../util/helperFunctions";
+import { deleteLocalFile, uploadFile} from "../util/helperFunctions";
 
 const getConversations = asyncHandler(async(req, res) => {
     if (!req.user) {
@@ -78,7 +78,7 @@ const addMessageToConversation = asyncHandler(async(req, res) => {
         if (req.file) {
             fileInfo = await uploadFile(req.file);
         };
-        await createMessage(formData.content, req.user.id, new Date(), {convoid: formData.conversationid, ...(req.file ? {fileInfo: fileInfo} : {})});
+        await createMessage(req.user.id, new Date(), {convoid: formData.conversationid, content: formData.content,  ...(req.file ? {fileInfo: fileInfo} : {})});
         await deleteLocalFile(req.file);
         res.status(200).json();
         return;
@@ -91,14 +91,14 @@ const addMessageToConversation = asyncHandler(async(req, res) => {
     const diferentCheckConvo = await checkIfConvoExistsByUsers(req.user.id, formData.targetid);
 
     if (diferentCheckConvo) {
-        await createMessage(formData.content, req.user.id, new Date(), {convoid: diferentCheckConvo.id, ...(req.file ? {fileInfo: fileInfo} : {})});
+        await createMessage(req.user.id, new Date(), {convoid: diferentCheckConvo.id, content: formData.content,...(req.file ? {fileInfo: fileInfo} : {})});
         await deleteLocalFile(req.file);
         res.status(200).json();
         return;
     };
 
     const convoInfo = await createConversation(req.user.id, formData.targetid);
-    await createMessage(formData.content, req.user.id, new Date(), {convoid: convoInfo.id, ...(req.file ? {fileInfo: fileInfo} : {})});
+    await createMessage(req.user.id, new Date(), {convoid: convoInfo.id, content: formData.content,...(req.file ? {fileInfo: fileInfo} : {})});
     await deleteLocalFile(req.file);
     res.status(200).json({message: "New Conversation"});
 });

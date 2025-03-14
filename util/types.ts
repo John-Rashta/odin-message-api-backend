@@ -3,7 +3,8 @@ import { UploadApiResponse } from "cloudinary";
 interface MessagesOptions {
     groupid? : string,
     convoid? : string,
-    fileInfo?: UploadApiResponse;
+    fileInfo?: UploadApiResponse,
+    content?: string,
 };
 
 interface UserOptions {

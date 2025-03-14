@@ -1,6 +1,7 @@
  import { cloudinary } from "../config/cloudinary";
  import { promisify } from "node:util";
  import fs from "fs";
+import { UploadApiResponse } from "cloudinary";
  const unlinkWithAsync = promisify(fs.unlink);
 
  interface FileData {
@@ -43,4 +44,14 @@ const uploadFile = async function uploadImageToCloudinary(fileStuff: Express.Mul
     return newImage;
 };
 
- export { deleteFiles, deleteLocalFile, uploadFile };
+const clearFilesIfError = async function deleteFilesFromLocalAndCloud(fileStuff: Express.Multer.File | undefined, cloudStuff: UploadApiResponse | undefined) {
+    if (fileStuff !== undefined) {
+        await deleteLocalFile(fileStuff);
+    }
+    if (cloudStuff !== undefined) {
+        await cloudinary.uploader.destroy(cloudStuff.public_id, {resource_type: "image"});
+    }
+    return;
+};
+
+ export { deleteFiles, deleteLocalFile, uploadFile, clearFilesIfError };

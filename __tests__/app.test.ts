@@ -453,7 +453,6 @@ describe("Basic API functionality", () => {
         userTwo
         .post("/conversations")
         .set("Content-Type", "multipart/form-data")
-        .field("content", "HELLO WORLD !")
         .field("conversationid", userOneInfo.convoid as string)
         .attach("uploaded_file", "util/pools/testStuff/waldo.png")
         .expect("Content-Type", /json/)

@@ -165,7 +165,7 @@ const createMessageInGroup = asyncHandler(async(req, res) => {
         fileInfo = await uploadFile(req.file);
     }
 
-    await createMessage(formData.content, req.user.id,  new Date(), {groupid: formData.groupid, ...(req.file ? {fileInfo: fileInfo} : {})});
+    await createMessage(req.user.id,  new Date(), {groupid: formData.groupid, content: formData.content,...(req.file ? {fileInfo: fileInfo} : {})});
     await deleteLocalFile(req.file);
     res.status(200).json();
 });
