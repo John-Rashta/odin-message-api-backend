@@ -7,7 +7,6 @@ const getFriends = asyncHandler( async(req, res) => {
         res.status(400).json();
         return;
     };
-    
     const friendships = await getUserFriends(req.user.id);
     if (!friendships) {
         res.status(400).json();
@@ -23,6 +22,11 @@ const deleteFriend = asyncHandler(async(req, res) => {
     };
 
     const formData = matchedData(req);
+
+    if (req.user.id === formData.targetid) {
+        res.status(400).json();
+        return;
+    };
 
     const checkFriendship = await checkIfFriendshipExists(req.user.id, formData.targetid);
 

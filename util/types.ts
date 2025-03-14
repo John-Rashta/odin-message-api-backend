@@ -1,6 +1,9 @@
+import { UploadApiResponse } from "cloudinary";
+
 interface MessagesOptions {
     groupid? : string,
     convoid? : string,
+    fileInfo?: UploadApiResponse;
 };
 
 interface UserOptions {
@@ -28,7 +31,7 @@ interface UserSign extends UserProfile {
 }
 
 interface UserUpdate extends UserProfile, UserOptions {
-
+    customIcon?: UploadApiResponse;
 };
 
 type ActionTypes = "ADD" | "REMOVE";

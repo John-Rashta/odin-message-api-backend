@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import { matchedData } from "express-validator";
 import { checkIfInConvo, getUserConversationsInfo, getUser, checkIfConvoExistsByUsers, createMessage, createConversation } from "../util/queries";
+import { deleteLocalFile, uploadFile } from "../util/helperFunctions";
 
 const getConversations = asyncHandler(async(req, res) => {
     if (!req.user) {
@@ -38,40 +39,67 @@ const getConversation = asyncHandler(async(req, res) => {
 
 const addMessageToConversation = asyncHandler(async(req, res) => {
     if (!req.user) {
+        await deleteLocalFile(req.file);
         res.status(400).json();
         return;
     };
     const formData = matchedData(req);
+
+    if (req.user.id === formData.targetid) {
+        await deleteLocalFile(req.file);
+        res.status(400).json();
+        return;
+    };
+
+    if (!formData.content && !req.file) {
+        await deleteLocalFile(req.file);
+        res.status(400).json();
+        return;
+    }
+
     if (formData.targetid) {
         const checkTarget = await getUser(formData.targetid);
 
         if (!checkTarget) {
+            await deleteLocalFile(req.file);
             res.status(400).json();
             return;
         };
     };
 
+    let fileInfo;
     if (formData.conversationid) {
         const checkConvo = await checkIfInConvo(req.user.id, formData.conversationid);
         if (!checkConvo) {
+            await deleteLocalFile(req.file);
             res.status(400).json();
             return;
         };
-        await createMessage(formData.content, req.user.id, new Date(), {convoid: formData.conversationid});
+        if (req.file) {
+            fileInfo = await uploadFile(req.file);
+        };
+        await createMessage(formData.content, req.user.id, new Date(), {convoid: formData.conversationid, ...(req.file ? {fileInfo: fileInfo} : {})});
+        await deleteLocalFile(req.file);
         res.status(200).json();
         return;
+    };
+
+    if (req.file) {
+        fileInfo = await uploadFile(req.file);
     };
 
     const diferentCheckConvo = await checkIfConvoExistsByUsers(req.user.id, formData.targetid);
 
     if (diferentCheckConvo) {
-        await createMessage(formData.content, req.user.id, new Date(), {convoid: diferentCheckConvo.id});
+        await createMessage(formData.content, req.user.id, new Date(), {convoid: diferentCheckConvo.id, ...(req.file ? {fileInfo: fileInfo} : {})});
+        await deleteLocalFile(req.file);
         res.status(200).json();
         return;
     };
 
     const convoInfo = await createConversation(req.user.id, formData.targetid);
-    await createMessage(formData.content, req.user.id, new Date(), {convoid: convoInfo.id});
+    await createMessage(formData.content, req.user.id, new Date(), {convoid: convoInfo.id, ...(req.file ? {fileInfo: fileInfo} : {})});
+    await deleteLocalFile(req.file);
     res.status(200).json({message: "New Conversation"});
 });
 
@@ -82,6 +110,10 @@ const createConvo = asyncHandler(async(req, res) => {
     };
 
     const formData = matchedData(req);
+    if (req.user.id === formData.targetid) {
+        res.status(400).json();
+        return;
+    };
     const checkTarget = await getUser(formData.targetid);
 
     if (!checkTarget) {

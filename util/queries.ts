@@ -20,7 +20,16 @@ const getUser = async function getUserFromDatabase(id: string, status = false) {
         select: {
             id: true,
             joinedAt: true,
-            icon: true,
+            customIcon: {
+                select: {
+                    url: true,
+                }
+            },
+            icon: {
+                select: {
+                    source: true,
+                },
+            },
             name: true,
             username: true,
             aboutMe: true,
@@ -43,7 +52,16 @@ const getUserFriends = async function getFriendsFromUserId(id: string) {
                             username: true,
                             id: true,
                             online: true,
-                            icon: true,
+                            customIcon: {
+                                select: {
+                                    url: true,
+                                }
+                            },
+                            icon: {
+                                select: {
+                                    source: true,
+                                },
+                            },
                         },
                         where: {
                             NOT: {
@@ -75,6 +93,16 @@ const getUserGroupsInfo = async function getUserGroupChatsFromId(id: string) {
                         select: {
                             id: true,
                             username: true,
+                            customIcon: {
+                                select: {
+                                    url: true,
+                                }
+                            },
+                            icon: {
+                                select: {
+                                    source: true,
+                                },
+                            },
                         },
                     },
                 }
@@ -119,6 +147,16 @@ const getUserConversationsInfo = async function getAllOfUserConversationsFromDat
                         select: {
                             username: true,
                             id: true,
+                            customIcon: {
+                                select: {
+                                    url: true,
+                                }
+                            },
+                            icon: {
+                                select: {
+                                    source: true,
+                                },
+                            },
                         },
                         where: {
                             NOT: [
@@ -237,6 +275,13 @@ const getGroupChatMessages = async function getGroupChatMessagesFromItsId(id: st
             content: true,
             sentAt: true,
             edited: true,
+            image: {
+                select: {
+                    public_id: true,
+                    url: true,
+                    uploadAt: true,
+                }
+            }
         }
     });
 
@@ -275,6 +320,13 @@ const getConvoInfo = async function getConvoInfoFromIds(userid: string, receiver
                     sentAt: true,
                     content: true,
                     edited: true,
+                    image: {
+                        select: {
+                            public_id: true,
+                            url: true,
+                            uploadAt: true,
+                        }
+                    }
                 }
             },
             id: true,
@@ -487,7 +539,15 @@ const createMessage = async function createMessageForGroupOrConvo(content: strin
                     id: options.groupid
                 }
             }}: {}),
-
+            ...(options.fileInfo ? {
+                image: {
+                    create: {
+                        url: options.fileInfo.secure_url,
+                        public_id: options.fileInfo.public_id,
+                        uploadAt: options.fileInfo.created_at,
+                    }
+                }
+            }: {}),   
         }
     });
 
@@ -509,7 +569,7 @@ const updateMessage = async function updateMessageContent(messageid: string, con
 };
 
 const changeUserInfo = async function updateUserDetails(userid: string, options: UserUpdate ) {
-    const {icon, ...rest} = options;
+    const {icon, customIcon, ...rest} = options;
     const updatedUser = await prisma.user.update({
         where: {
             id: userid,
@@ -523,6 +583,15 @@ const changeUserInfo = async function updateUserDetails(userid: string, options:
                     }
                 }
             }: {}),
+            ...(customIcon ? {
+                customIcon: {
+                    create: {
+                        url: customIcon.secure_url,
+                        public_id: customIcon.public_id,
+                        uploadAt: customIcon.created_at,
+                    }
+                }
+            }: {}),   
         },
         select: {
             id: true,
@@ -530,12 +599,22 @@ const changeUserInfo = async function updateUserDetails(userid: string, options:
             icon: true,
             name: true,
             username: true,
-            aboutMe: true
+            aboutMe: true,
+            customIcon: true,
         }
     });
 
     return updatedUser;
 };
+
+const deleteCustomIcon = async function deleteCustomIconWhenNormalIconIsChosen(customid: string) {
+    const deletedIcon = await prisma.customIcons.delete({
+        where: {
+            id: customid
+        }
+    });
+    return deletedIcon;
+}
 
 const updateGroupInfo = async function updateGroupDetails(groupid: string, options: GroupOptions) {
     const optionsManager = {
@@ -601,10 +680,22 @@ const deleteGroup = async function deleteGroupChatFromDatabase(groupid: string) 
     const deletedGroup = await prisma.groupChat.delete({
         where: {
             id: groupid,
-        }
+        },
     });
 
     return deletedGroup;
+};
+
+const getGroupImages = async function getImagesRelatedToGroup(groupid: string) {
+    const foundImages = await prisma.customMessages.findMany({
+        where: {
+            message: {
+                groupid: groupid
+            }
+        },
+    });
+
+    return foundImages;
 };
 
 const deleteConversation = async function deleteConversationFromDatabase(convoid: string) {
@@ -631,6 +722,9 @@ const deleteMessage = async function deleteMessageFromDatabase(messageid: string
     const deletedMessage = await prisma.messages.delete({
         where: {
             id: messageid
+        },
+        include: {
+            image: true
         }
     });
 
@@ -782,13 +876,30 @@ const checkIfInConvo = async function checkIfUserInConversation(userid: string, 
                     sentAt: true,
                     content: true,
                     id: true,
-                }
+                    image: {
+                        select: {
+                            url: true,
+                            uploadAt: true,
+                            public_id: true,
+                        }
+                    }
+                },
             },
             id: true,
         members: {
             select: {
                 id: true,
                 username: true,
+                customIcon: {
+                    select: {
+                        url: true,
+                    }
+                },
+                icon: {
+                    select: {
+                        source: true,
+                    },
+                },
             }
         }   
         },
@@ -851,7 +962,16 @@ const searchForUsers = async function searchForUsersByUsername(username: string)
             username: true,
             id: true,
             joinedAt: true,
-            icon: true,
+            customIcon: {
+                select: {
+                    url: true,
+                }
+            },
+            icon: {
+                select: {
+                    source: true,
+                },
+            },
             name: true,
             aboutMe: true,
         }
@@ -902,14 +1022,32 @@ const checkAndReturnGroup = async function checkIfInGroupAndReturnAllInfo(userid
             id: true,
             members: {
                 select: {
-                    icon: true,
+                    customIcon: {
+                        select: {
+                            url: true,
+                        }
+                    },
+                    icon: {
+                        select: {
+                            source: true,
+                        },
+                    },
                     username: true,
                     id: true
                 }
             },
             admins: {
                 select: {
-                    icon: true,
+                    customIcon: {
+                        select: {
+                            url: true,
+                        }
+                    },
+                    icon: {
+                        select: {
+                            source: true,
+                        },
+                    },
                     username: true,
                     id: true
                 }
@@ -929,6 +1067,13 @@ const checkAndReturnGroup = async function checkIfInGroupAndReturnAllInfo(userid
                             username: true
                         }
                     },
+                    image: {
+                        select: {
+                            public_id: true,
+                            url: true,
+                            uploadAt: true,
+                        }
+                    }
 
                 }
             }
@@ -963,6 +1108,8 @@ const deleteEverything = async function deleteEverythingFromTestDatabase() {
 };
 
 export {
+    deleteCustomIcon,
+    getGroupImages,
     getUserPassword,
     checkAndReturnGroup,
     getAllIconsInfo,

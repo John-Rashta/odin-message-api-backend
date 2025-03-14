@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
-import { checkAndReturnGroup, checkIfGroupAdmin, checkIfGroupMember, createGroupChat, createMessage, deleteGroup, getUser, getUserGroupsInfo, updateGroupInfo } from "../util/queries";
+import { checkAndReturnGroup, checkIfGroupAdmin, checkIfGroupMember, createGroupChat, createMessage, deleteGroup, getGroupImages, getUser, getUserGroupsInfo, updateGroupInfo } from "../util/queries";
 import { matchedData } from "express-validator";
+import { deleteFiles, deleteLocalFile, uploadFile } from "../util/helperFunctions";
 
 const createGroup = asyncHandler(async(req, res) => {
     if (!req.user) {
@@ -69,6 +70,12 @@ const updateGroup = asyncHandler(async(req, res) => {
     };
      
     const formData = matchedData(req);
+
+    if (req.user.id === formData.targetid) {
+        res.status(400).json();
+        return;
+    };
+
     const checkAdmin = await checkIfGroupAdmin(req.user.id, formData.groupid);
 
     if (!checkAdmin) {
@@ -137,17 +144,29 @@ const updateGroup = asyncHandler(async(req, res) => {
 
 const createMessageInGroup = asyncHandler(async(req, res) => {
     if (!req.user) {
-        res.status(400).json();
-        return;
-    };
-    const formData = matchedData(req);
-    const checkIfMember = await checkIfGroupMember(req.user.id, formData.groupid);
-    if (!checkIfMember) {
+        await deleteLocalFile(req.file);
         res.status(400).json();
         return;
     };
 
-    await createMessage(formData.content, req.user.id,  new Date(), {groupid: formData.groupid});
+    const formData = matchedData(req);
+    if (!formData.content && !req.file) {
+        res.status(400).json();
+        return;
+    }
+    const checkIfMember = await checkIfGroupMember(req.user.id, formData.groupid);
+    if (!checkIfMember) {
+        await deleteLocalFile(req.file);
+        res.status(400).json();
+        return;
+    };
+    let fileInfo;
+    if (req.file) {
+        fileInfo = await uploadFile(req.file);
+    }
+
+    await createMessage(formData.content, req.user.id,  new Date(), {groupid: formData.groupid, ...(req.file ? {fileInfo: fileInfo} : {})});
+    await deleteLocalFile(req.file);
     res.status(200).json();
 });
 
@@ -164,7 +183,8 @@ const fullDeleteGroup = asyncHandler(async(req, res) => {
         res.status(400).json();
         return;
     };
-
+    const foundImages = await getGroupImages(formData.groupid);
+    await deleteFiles(foundImages);
     await deleteGroup(formData.groupid);
     res.status(200).json();
 });

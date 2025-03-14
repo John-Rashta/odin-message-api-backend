@@ -59,6 +59,12 @@ const makeRequest = asyncHandler(async(req, res) => {
         return;
     };
     const formData = matchedData(req);
+
+    if (req.user.id === formData.targetid) {
+        res.status(400).json();
+        return;
+    };
+    
     const checkTarget = await getUser(formData.targetid);
     if(!checkTarget) {
         res.status(400).json();

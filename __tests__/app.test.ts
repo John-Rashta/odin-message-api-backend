@@ -356,6 +356,25 @@ describe("Basic API functionality", () => {
             .expect(200, done)
     });
 
+    test("update profile with custom file", done => {
+        userOne
+            .put("/users/profile")
+            .set("Content-Type", "multipart/form-data")
+            .attach("uploaded_file", "util/pools/testStuff/waldo.png")
+            .expect("Content-Type", /json/)
+            .expect(200, done)
+    });
+
+    ///ERROR TEST
+    test("fail to update with image too large", done => {
+        userOne
+        .put("/users/profile")
+        .set("Content-Type", "multipart/form-data")
+        .attach("uploaded_file", "util/pools/testStuff/book4troy.webp")
+        .expect("Content-Type", /json/)
+        .expect(400, done)
+    });
+
     test("create conversation", done => {
         userTwo
             .post("/conversations/create")
@@ -428,6 +447,17 @@ describe("Basic API functionality", () => {
                 userTwoInfo.messageid = res.body.conversation.contents[0].id;
                 done();
             });
+    });
+
+    test("send message with image", done => {
+        userTwo
+        .post("/conversations")
+        .set("Content-Type", "multipart/form-data")
+        .field("content", "HELLO WORLD !")
+        .field("conversationid", userOneInfo.convoid as string)
+        .attach("uploaded_file", "util/pools/testStuff/waldo.png")
+        .expect("Content-Type", /json/)
+        .expect(200, done)
     });
 
     test("sends message in conversation when conversationid is provided", done => {

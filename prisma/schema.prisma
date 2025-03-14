@@ -20,6 +20,7 @@ model User {
   name String?
   icon Icons @relation(fields: [iconid], references: [id])
   iconid Int
+  customIcon CustomIcons?
   joinedAt DateTime
   aboutMe String?
   online Boolean @default(false)
@@ -67,7 +68,7 @@ model Friendships {
 model Messages {
   id String @id @default(uuid())
   sentAt DateTime
-  content String
+  content String @default("")
   edited Boolean @default(false)
   sender User @relation(fields: [senderid], references: [id], onDelete: Cascade)
   senderid String
@@ -75,6 +76,7 @@ model Messages {
   convoid String?
   group GroupChat? @relation(fields: [groupid], references: [id], onDelete: Cascade)
   groupid String?
+  image CustomMessages?
 }
 
 model Session {
@@ -88,6 +90,24 @@ model Icons {
   id Int @id @default(autoincrement())
   users User[]
   source String
+}
+
+model CustomIcons {
+  id String @id @default(uuid())
+  public_id String
+  url String
+  uploadAt DateTime
+  person User @relation(fields: [personid], references: [id], onDelete: Cascade)
+  personid String @unique
+}
+
+model CustomMessages {
+  id String @id @default(uuid())
+  public_id String
+  url String
+  uploadAt DateTime
+  message Messages @relation(fields: [messageid], references: [id], onDelete: Cascade)
+  messageid String @unique
 }
 
 enum Types {

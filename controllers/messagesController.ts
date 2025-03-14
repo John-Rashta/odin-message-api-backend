@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import { matchedData } from "express-validator";
 import { checkOwnerOfMessage, deleteMessage, updateMessage } from "../util/queries";
+import { deleteFiles } from "../util/helperFunctions";
 
 const updateUserMessage = asyncHandler(async(req, res) => {
     if (!req.user) {
@@ -34,7 +35,10 @@ const deleteUserMessage = asyncHandler(async(req, res) => {
         return;
     };
 
-    await deleteMessage(formData.messageid);
+    const deletedMessage = await deleteMessage(formData.messageid);
+    if (deletedMessage.image) {
+        await deleteFiles([deletedMessage.image]);
+    }
     res.status(200).json();
 });
 

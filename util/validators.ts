@@ -72,7 +72,15 @@ const validateMessage = [
     body("content")
         .notEmpty()
         .isAscii().withMessage("Must be only Ascii characters.")
-]; 
+];
+
+const validateOptionalMessage = [
+    body("content")
+        .optional({values: "falsy"})
+        .notEmpty()
+        .isAscii().withMessage("Must be only Ascii characters.")
+
+]
 
 const validateGroupUpdate = [
     body("targetid")
@@ -91,4 +99,4 @@ const validateGroupName = [
 
 ]
 
-export { validateGroupName, validateGroupUpdate, validateMessage, validateSearchUser, validateCredentials, validateUUID, validateType, validateBodyUUID, validateRequestGroup, validateOptionalUUID, validateUserProfile, validateOptionalCredentials };
+export { validateGroupName, validateOptionalMessage, validateGroupUpdate, validateMessage, validateSearchUser, validateCredentials, validateUUID, validateType, validateBodyUUID, validateRequestGroup, validateOptionalUUID, validateUserProfile, validateOptionalCredentials };
