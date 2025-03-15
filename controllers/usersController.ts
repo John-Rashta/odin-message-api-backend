@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { matchedData } from "express-validator";
-import { changeUserInfo, checkIfFriendshipExists, checkIfUsernameAvailable, createUser, deleteCustomIcon, getAllIconsInfo, getIconInfo, getUser, getUserPassword, searchForUsers } from "../util/queries";
+import { changeUserInfo, checkIfFriendshipExists, checkIfUsernameAvailable, createUser, deleteCustomIcon, getAllIconsInfo, getFullInfo, getIconInfo, getUser, getUserPassword, searchForUsers } from "../util/queries";
 import bcrypt from "bcryptjs";
 import isUUID from "validator/lib/isUUID";
 import { deleteFiles, deleteLocalFile, uploadFile, clearFilesIfError } from "../util/helperFunctions";
@@ -56,6 +56,7 @@ const updateProfile = asyncHandler(async(req, res) => {
     };
 
     const formData = matchedData(req);
+    const userInfo = await getFullInfo(req.user.id);
     if (formData.icon) {
         const checkIcon = await getIconInfo(formData.icon);
         if (!checkIcon) {
@@ -90,10 +91,10 @@ const updateProfile = asyncHandler(async(req, res) => {
             await clearFilesIfError(req.file, fileInfo);
             res.status(400).json();
             return;
-        }
+        };
         const match = await bcrypt.compare(formData.oldPassword, userPw.password);
         if (!match) {
-            await clearFilesIfError(req.file, fileInfo);;
+            await clearFilesIfError(req.file, fileInfo);
             res.status(400).json({message: "Wrong old password"});
             return;
         };
@@ -107,11 +108,11 @@ const updateProfile = asyncHandler(async(req, res) => {
             if (req.user) {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { oldPassword, ...rest} = formData;
-                const updatedInfo = await changeUserInfo(req.user.id, {...rest, password: hashedPassword, ...(req.file ? {customIcon: fileInfo} : {})});
-                if (formData.icon && updatedInfo.customIcon) {
-                    await deleteFiles([updatedInfo.customIcon]);
-                    await deleteCustomIcon(updatedInfo.customIcon.id);
+                if ((formData.icon || req.file) && (userInfo && userInfo.customIcon)) {
+                    await deleteFiles([userInfo.customIcon]);
+                    await deleteCustomIcon(userInfo.customIcon.id);
                 };
+                await changeUserInfo(req.user.id, {...rest, password: hashedPassword, ...(req.file ? {customIcon: fileInfo} : {})});
                 await deleteLocalFile(req.file);
                 res.status(200).json();
                 return;
@@ -119,12 +120,11 @@ const updateProfile = asyncHandler(async(req, res) => {
         });
         return;
     };
-    
-    const updatedInfo = await changeUserInfo(req.user.id, {...formData, ...(req.file ? {customIcon: fileInfo} : {})});
-    if (formData.icon && updatedInfo.customIcon) {
-        await deleteFiles([updatedInfo.customIcon]);
-        await deleteCustomIcon(updatedInfo.customIcon.id);
+    if ((formData.icon || req.file) && (userInfo && userInfo.customIcon)) {
+        await deleteFiles([userInfo.customIcon]);
+        await deleteCustomIcon(userInfo.customIcon.id);
     };
+    await changeUserInfo(req.user.id, {...formData, ...(req.file ? {customIcon: fileInfo} : {})});
     await deleteLocalFile(req.file);
     res.status(200).json();
     return;

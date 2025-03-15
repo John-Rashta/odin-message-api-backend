@@ -10,7 +10,7 @@ const conversationsRoute = Router();
 
 conversationsRoute.get("/", isAuth, getConversations );
 conversationsRoute.get("/:conversationid", isAuth, validateUUID("conversationid"), validationErrorMiddleware, getConversation);
-conversationsRoute.post("/", isAuth, validateOptionalUUID("targetid"), validateOptionalMessage, validateOptionalUUID("conversationid"), validationErrorMiddleware, upload.single("uploaded_file"), addMessageToConversation, multerErrorMiddleware);
+conversationsRoute.post("/", isAuth, upload.single("uploaded_file"), validateOptionalUUID("targetid"), validateOptionalMessage, validateOptionalUUID("conversationid"), validationErrorMiddleware, addMessageToConversation, multerErrorMiddleware);
 conversationsRoute.post("/create", isAuth, validateBodyUUID, validationErrorMiddleware, createConvo);
 
 export default conversationsRoute;

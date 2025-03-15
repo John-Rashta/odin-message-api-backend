@@ -12,7 +12,7 @@ usersRoute.get("/profile", isAuth, getSelfInfo);
 usersRoute.get("/search", validateSearchUser, validationErrorMiddleware, searchUsers);
 usersRoute.get("/:userid", isAuth, validateUUID("userid"), validationErrorMiddleware, getUserInfo);
 usersRoute.post("/", validateCredentials, validateUserProfile, validationErrorMiddleware, signupUser);
-usersRoute.put("/profile", isAuth, validateUserProfile, validateOptionalCredentials, validationErrorMiddleware, upload.single("uploaded_file"), updateProfile, multerErrorMiddleware);
+usersRoute.put("/profile", isAuth, upload.single("uploaded_file"), validateUserProfile, validateOptionalCredentials, validationErrorMiddleware, updateProfile, multerErrorMiddleware);
 usersRoute.get("/profile/icons", isAuth, getIcons);
 
 export default usersRoute;

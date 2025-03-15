@@ -366,6 +366,18 @@ describe("Basic API functionality", () => {
     });
 
     ///ERROR TEST
+    test("testing if helper delete functions work properly", done => {
+        userOne
+        .put("/users/profile")
+        .set("Content-Type", "multipart/form-data")
+        .field("password", "333")
+        .field("oldPassword", "12saSSS")
+        .attach("uploaded_file", "util/pools/testStuff/waldo.png")
+        .expect("Content-Type", /json/)
+        .expect(400, done)
+    })
+
+    ///ERROR TEST
     test("fail to update with image too large", done => {
         userOne
         .put("/users/profile")

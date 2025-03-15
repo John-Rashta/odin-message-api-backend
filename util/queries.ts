@@ -568,6 +568,20 @@ const updateMessage = async function updateMessageContent(messageid: string, con
     return updatedMessage;
 };
 
+const getFullInfo = async function getAllInfoFromUser(userid: string) {
+    const userInfo = await prisma.user.findFirst({
+        where: {
+            id: userid
+        },
+        include: {
+            icon: true,
+            customIcon: true,
+        }
+    });
+
+    return userInfo;
+};
+
 const changeUserInfo = async function updateUserDetails(userid: string, options: UserUpdate ) {
     const {icon, customIcon, ...rest} = options;
     const updatedUser = await prisma.user.update({
@@ -1108,6 +1122,7 @@ const deleteEverything = async function deleteEverythingFromTestDatabase() {
 };
 
 export {
+    getFullInfo,
     deleteCustomIcon,
     getGroupImages,
     getUserPassword,

@@ -1,9 +1,9 @@
 import { body, param, query } from "express-validator";
 
 const validateCredentials = [
-    body("username").trim()
+    body("username")
         .isAlphanumeric().withMessage("Must only contain letters and/or numbers."),
-    body("password").trim()
+    body("password")
         .isAscii().withMessage("Must be only Ascii characters.")
 ];
 
@@ -54,10 +54,10 @@ const validateOptionalCredentials = [
     body("username").trim()
         .optional({ values: "falsy" })
         .isAlphanumeric().withMessage("Must only contain letters and/or numbers."),
-    body("password").trim()
+    body("password")
         .optional({ values: "falsy" })
         .isAscii().withMessage("Must be only Ascii characters."),
-    body("oldPassword").trim()
+    body("oldPassword")
         .optional({ values: "falsy" })
         .isAscii().withMessage("Must be only Ascii characters.")
     ];
