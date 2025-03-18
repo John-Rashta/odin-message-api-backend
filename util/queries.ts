@@ -885,6 +885,8 @@ const checkIfInConvo = async function checkIfUserInConversation(userid: string, 
                         select: {
                             username: true,
                             id: true,
+                            icon: true,
+                            customIcon: true,
                         },
                     },
                     edited: true,
@@ -1084,7 +1086,9 @@ const checkAndReturnGroup = async function checkIfInGroupAndReturnAllInfo(userid
                     sender: {
                         select: {
                             id: true,
-                            username: true
+                            username: true,
+                            icon: true,
+                            customIcon: true,
                         }
                     },
                     image: {
