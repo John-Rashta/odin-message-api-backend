@@ -7,7 +7,7 @@ const loginUser = asyncHandler(async(req, res) => {
     return;
   };
   await changeOnlineStatus(req.user.id, true);
-  res.status(200).json();
+  res.status(200).json({id: req.user.id});
 });
 
 const logoutUser = asyncHandler(async (req, res, next) => {
