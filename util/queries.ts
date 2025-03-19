@@ -315,8 +315,19 @@ const getConvoInfo = async function getConvoInfoFromIds(userid: string, receiver
                         select: {
                             username: true,
                             id: true,
+                            customIcon: {
+                                select: {
+                                    url: true,
+                                }
+                            },
+                            icon: {
+                                select: {
+                                    source: true,
+                                },
+                            },
                         },
                     },
+                    id: true,
                     sentAt: true,
                     content: true,
                     edited: true,
@@ -334,6 +345,16 @@ const getConvoInfo = async function getConvoInfoFromIds(userid: string, receiver
             select: {
                 id: true,
                 username: true,
+                customIcon: {
+                    select: {
+                        url: true,
+                    }
+                },
+                icon: {
+                    select: {
+                        source: true,
+                    },
+                },
             }
         }   
         },

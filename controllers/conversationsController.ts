@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { matchedData } from "express-validator";
-import { checkIfInConvo, getUserConversationsInfo, getUser, checkIfConvoExistsByUsers, createMessage, createConversation } from "../util/queries";
+import { checkIfInConvo, getUserConversationsInfo, getUser, checkIfConvoExistsByUsers, createMessage, createConversation, getConvoInfo } from "../util/queries";
 import { deleteLocalFile, uploadFile} from "../util/helperFunctions";
 
 const getConversations = asyncHandler(async(req, res) => {
@@ -27,6 +27,17 @@ const getConversation = asyncHandler(async(req, res) => {
 
     const formData = matchedData(req);
 
+    if (formData.type === "USER") {
+        const convoInfo = await getConvoInfo(req.user.id, formData.conversationid);
+
+        if (!convoInfo) {
+            res.status(400).json();
+            return;
+        };
+
+        res.status(200).json({conversation: convoInfo});
+        return;
+    };
     const conversationInfo = await checkIfInConvo(req.user.id, formData.conversationid);
 
     if (!conversationInfo) {

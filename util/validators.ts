@@ -91,6 +91,12 @@ const validateGroupUpdate = [
         .isIn(["REMOVE", "PROMOTE", "DEMOTE"]).withMessage("Types can only be REMOVE, DEMOTE or PROMOTE"),
 ];
 
+const validateConvoQuery = [
+    query("type")
+    .optional({values: "falsy"})
+    .isAlpha().withMessage("Only letters")
+]
+
 const validateGroupName = [
     body("name")
     .optional({values: "falsy"})
@@ -99,4 +105,4 @@ const validateGroupName = [
 
 ]
 
-export { validateGroupName, validateOptionalMessage, validateGroupUpdate, validateMessage, validateSearchUser, validateCredentials, validateUUID, validateType, validateBodyUUID, validateRequestGroup, validateOptionalUUID, validateUserProfile, validateOptionalCredentials };
+export { validateConvoQuery, validateGroupName, validateOptionalMessage, validateGroupUpdate, validateMessage, validateSearchUser, validateCredentials, validateUUID, validateType, validateBodyUUID, validateRequestGroup, validateOptionalUUID, validateUserProfile, validateOptionalCredentials };
