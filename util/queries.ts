@@ -355,6 +355,13 @@ const getConvoInfo = async function getConvoInfoFromIds(userid: string, receiver
                         source: true,
                     },
                 },
+            },
+            where: {
+                NOT: [
+                    {
+                        id: userid
+                    }
+                ]
             }
         }   
         },
@@ -938,6 +945,13 @@ const checkIfInConvo = async function checkIfUserInConversation(userid: string, 
                         source: true,
                     },
                 },
+            },
+            where: {
+                NOT: [
+                    {
+                        id: userid
+                    }
+                ]
             }
         }   
         },
