@@ -192,6 +192,7 @@ const getAllUserRequests = async function getUserRequestsFromDatabase(id: string
                     sentAt: true,
                     type: true,
                     id: true,
+                    group: true
                 },
                 orderBy: {
                     sentAt: "desc"
@@ -233,6 +234,7 @@ const getUserSentRequests = async function getUserSentRequestsFromDatabase(id: s
             id: true,
             sentRequest: {
                 select: {
+                    group: true,
                     type: true,
                     sender: {
                         select: {
