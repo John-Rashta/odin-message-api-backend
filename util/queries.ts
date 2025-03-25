@@ -998,11 +998,7 @@ const getRequestInfo = async function getRequestInfoFromDatabase(requestid: stri
                     username: true,
                 }
             },
-            group: {
-                select: {
-                    name: true,
-                }
-            }
+            group: true,
 
         }
     });
