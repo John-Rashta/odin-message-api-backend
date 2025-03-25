@@ -189,6 +189,12 @@ const getAllUserRequests = async function getUserRequestsFromDatabase(id: string
                             id: true,
                         },
                     },
+                    receiver: {
+                        select: {
+                            username: true,
+                            id: true,
+                        },
+                    },
                     sentAt: true,
                     type: true,
                     id: true,
