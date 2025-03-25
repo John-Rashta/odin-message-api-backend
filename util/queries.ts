@@ -1029,7 +1029,8 @@ const searchForUsers = async function searchForUsersByUsername(username: string)
             },
             name: true,
             aboutMe: true,
-        }
+        },
+        take: 50
     });
 
     return possibleUsers;
