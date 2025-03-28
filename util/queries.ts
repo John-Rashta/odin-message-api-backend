@@ -445,6 +445,14 @@ const checkOwnerOfMessage = async function checkIfUserOwnsMessage(userid: string
         where: {
             id: messageid,
             senderid: userid
+        },
+        include: {
+            image: {
+                select: {
+                    id: true,
+                    url: true,
+                }
+            }
         }
     });
 

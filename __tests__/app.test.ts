@@ -481,6 +481,17 @@ describe("Basic API functionality", () => {
             })
             .expect("Content-Type", /json/)
             .expect(200, done)
+    });
+
+    test("get message info", done => {
+        userTwo
+            .get(`/messages/${userTwoInfo.messageid}`)
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .then((res) => {
+                expect(res.body).toHaveProperty("message");
+                done();
+            });
     })
 
     ///ERROR TEST

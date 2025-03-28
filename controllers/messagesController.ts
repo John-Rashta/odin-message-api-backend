@@ -42,4 +42,20 @@ const deleteUserMessage = asyncHandler(async(req, res) => {
     res.status(200).json();
 });
 
-export { updateUserMessage, deleteUserMessage };
+const getMessage = asyncHandler(async(req, res) => {
+    if (!req.user) {
+        res.status(400).json();
+        return;
+    };
+    const formData = matchedData(req);
+    const messageInfo = checkOwnerOfMessage(req.user.id, formData.messageid);
+
+    if (!messageInfo) {
+        res.status(400).json();
+        return;
+    };
+
+    res.status(200).json({message: messageInfo});
+});
+
+export { updateUserMessage, deleteUserMessage, getMessage };
