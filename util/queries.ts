@@ -446,13 +446,31 @@ const checkOwnerOfMessage = async function checkIfUserOwnsMessage(userid: string
             id: messageid,
             senderid: userid
         },
-        include: {
+        select: {
             image: {
                 select: {
                     id: true,
                     url: true,
                 }
-            }
+            },
+            sender: {
+                select: {
+                    id: true,
+                    username: true,
+                    icon: true,
+                    customIcon: {
+                        select: {
+                            url: true
+                        }
+                    },
+                }
+            },
+            id: true,
+            content: true,
+            edited: true,
+            groupid: true,
+            convoid: true,
+            sentAt: true,
         }
     });
 
