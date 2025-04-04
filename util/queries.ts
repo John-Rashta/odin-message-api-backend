@@ -240,6 +240,7 @@ const getUserSentRequests = async function getUserSentRequestsFromDatabase(id: s
             id: true,
             sentRequest: {
                 select: {
+                    id: true,
                     group: true,
                     type: true,
                     sender: {
