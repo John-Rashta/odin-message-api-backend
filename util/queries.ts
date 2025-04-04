@@ -1108,6 +1108,7 @@ const checkAndReturnGroup = async function checkIfInGroupAndReturnAllInfo(userid
             }
         },
         select: {
+            name: true,
             id: true,
             members: {
                 select: {
