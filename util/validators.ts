@@ -101,7 +101,7 @@ const validateGroupName = [
     body("name")
     .optional({values: "falsy"})
     .notEmpty()
-    .isAscii().withMessage("Must be either an Username or an UUID")
+    .isAscii().withMessage("Must be Ascii")
 
 ]
 
