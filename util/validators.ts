@@ -44,7 +44,8 @@ const validateUserProfile = [
         .isAscii().withMessage("Must only be Ascii"),
     body("icon")
         .optional({ values: "falsy" })
-        .isInt().withMessage("Must be an integer"),
+        .isInt().withMessage("Must be an integer")
+        .toInt(),
     body("aboutMe")
         .optional({ values: "falsy" })
         .isAscii().withMessage("Must only be Ascii"),
