@@ -48,7 +48,7 @@ const getMessage = asyncHandler(async(req, res) => {
         return;
     };
     const formData = matchedData(req);
-    const messageInfo = checkOwnerOfMessage(req.user.id, formData.messageid);
+    const messageInfo = await checkOwnerOfMessage(req.user.id, formData.messageid);
 
     if (!messageInfo) {
         res.status(400).json();
