@@ -36,7 +36,7 @@ const getGroup = asyncHandler( async(req, res) => {
     const groupInfo = await checkAndReturnGroup(req.user.id, formData.groupid);
 
     if (!groupInfo) {
-        res.status(400).json();
+        res.status(403).json();
         return;
     };
 
