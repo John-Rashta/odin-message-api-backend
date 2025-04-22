@@ -72,14 +72,16 @@ const validateSearchUser = [
 const validateMessage = [
     body("content")
         .notEmpty()
-        .isAscii().withMessage("Must be only Ascii characters.")
+        .isString().withMessage("Must be only Ascii characters.")
+        .escape()
 ];
 
 const validateOptionalMessage = [
     body("content")
         .optional({values: "falsy"})
         .notEmpty()
-        .isAscii().withMessage("Must be only Ascii characters.")
+        .isString().withMessage("Must be only Ascii characters.")
+        .escape()
 
 ]
 
