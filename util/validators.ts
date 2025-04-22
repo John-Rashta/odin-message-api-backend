@@ -73,7 +73,6 @@ const validateMessage = [
     body("content")
         .notEmpty()
         .isString()
-        .escape()
 ];
 
 const validateOptionalMessage = [
@@ -81,8 +80,6 @@ const validateOptionalMessage = [
         .optional({values: "falsy"})
         .notEmpty()
         .isString()
-        .escape()
-
 ]
 
 const validateGroupUpdate = [
