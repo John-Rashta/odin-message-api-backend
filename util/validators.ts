@@ -40,15 +40,15 @@ const validateOptionalUUID = (fieldname: string) => {
 
 const validateUserProfile = [
     body("name")
-        .optional({ values: "falsy" })
-        .isAscii().withMessage("Must only be Ascii"),
+        .optional()
+        .isString().withMessage("Must only be Ascii"),
     body("icon")
         .optional({ values: "falsy" })
         .isInt().withMessage("Must be an integer")
         .toInt(),
     body("aboutMe")
-        .optional({ values: "falsy" })
-        .isAscii().withMessage("Must only be Ascii"),
+        .optional()
+        .isString().withMessage("Must only be Ascii"),
 ];
 
 const validateOptionalCredentials = [
