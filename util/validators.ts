@@ -41,14 +41,14 @@ const validateOptionalUUID = (fieldname: string) => {
 const validateUserProfile = [
     body("name")
         .optional()
-        .isString().withMessage("Must only be Ascii"),
+        .isString(),
     body("icon")
         .optional({ values: "falsy" })
         .isInt().withMessage("Must be an integer")
         .toInt(),
     body("aboutMe")
         .optional()
-        .isString().withMessage("Must only be Ascii"),
+        .isString(),
 ];
 
 const validateOptionalCredentials = [
