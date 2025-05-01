@@ -7,8 +7,13 @@ import passport from "passport";
 
 const authRoute = Router();
 
-authRoute.post("/", validateCredentials, validationErrorMiddleware, passport.authenticate("local"), loginUser);
+authRoute.post(
+  "/",
+  validateCredentials,
+  validationErrorMiddleware,
+  passport.authenticate("local"),
+  loginUser,
+);
 authRoute.put("/", isAuth, logoutUser);
-
 
 export default authRoute;

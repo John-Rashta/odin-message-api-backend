@@ -1,108 +1,120 @@
 import { body, param, query } from "express-validator";
 
 const validateCredentials = [
-    body("username")
-        .isAlphanumeric().withMessage("Must only contain letters and/or numbers."),
-    body("password")
-        .isAscii().withMessage("Must be only Ascii characters.")
+  body("username")
+    .isAlphanumeric()
+    .withMessage("Must only contain letters and/or numbers."),
+  body("password").isAscii().withMessage("Must be only Ascii characters."),
 ];
 
 const validateUUID = (fieldname: string) => {
-    return [
-        param(fieldname)
-            .isUUID().withMessage("Must be an UUID")
-    ]
+  return [param(fieldname).isUUID().withMessage("Must be an UUID")];
 };
 
 const validateType = [
-    body("type")
-        .isIn(["FRIEND", "GROUP"]).withMessage("Types can only be FRIEND or GROUP")
+  body("type")
+    .isIn(["FRIEND", "GROUP"])
+    .withMessage("Types can only be FRIEND or GROUP"),
 ];
 
 const validateBodyUUID = [
-    body("targetid")
-        .isUUID().withMessage("Must be an UUID")
+  body("targetid").isUUID().withMessage("Must be an UUID"),
 ];
 
 const validateRequestGroup = [
-    body("groupid")
-        .optional({ values: "falsy" })
-        .isUUID().withMessage("Must be an UUID")
+  body("groupid")
+    .optional({ values: "falsy" })
+    .isUUID()
+    .withMessage("Must be an UUID"),
 ];
 
 const validateOptionalUUID = (fieldname: string) => {
-    return [
-        body(fieldname)
-            .optional({ values: "falsy" })
-            .isUUID().withMessage("Must be an UUID")
-    ]
+  return [
+    body(fieldname)
+      .optional({ values: "falsy" })
+      .isUUID()
+      .withMessage("Must be an UUID"),
+  ];
 };
 
 const validateUserProfile = [
-    body("name")
-        .optional()
-        .isString(),
-    body("icon")
-        .optional({ values: "falsy" })
-        .isInt().withMessage("Must be an integer")
-        .toInt(),
-    body("aboutMe")
-        .optional()
-        .isString(),
+  body("name").optional().isString(),
+  body("icon")
+    .optional({ values: "falsy" })
+    .isInt()
+    .withMessage("Must be an integer")
+    .toInt(),
+  body("aboutMe").optional().isString(),
 ];
 
 const validateOptionalCredentials = [
-    body("username").trim()
-        .optional({ values: "falsy" })
-        .isAlphanumeric().withMessage("Must only contain letters and/or numbers."),
-    body("password")
-        .optional({ values: "falsy" })
-        .isAscii().withMessage("Must be only Ascii characters."),
-    body("oldPassword")
-        .optional({ values: "falsy" })
-        .isAscii().withMessage("Must be only Ascii characters.")
-    ];
+  body("username")
+    .trim()
+    .optional({ values: "falsy" })
+    .isAlphanumeric()
+    .withMessage("Must only contain letters and/or numbers."),
+  body("password")
+    .optional({ values: "falsy" })
+    .isAscii()
+    .withMessage("Must be only Ascii characters."),
+  body("oldPassword")
+    .optional({ values: "falsy" })
+    .isAscii()
+    .withMessage("Must be only Ascii characters."),
+];
 
 const validateSearchUser = [
-    query("user")
-        .notEmpty()
-        .isAscii().withMessage("Must be either an Username or an UUID")
+  query("user")
+    .notEmpty()
+    .isAscii()
+    .withMessage("Must be either an Username or an UUID"),
 ];
 
-const validateMessage = [
-    body("content")
-        .notEmpty()
-        .isString()
-];
+const validateMessage = [body("content").notEmpty().isString()];
 
 const validateOptionalMessage = [
-    body("content")
-        .optional({values: "falsy"})
-        .notEmpty()
-        .isString()
-]
+  body("content").optional({ values: "falsy" }).notEmpty().isString(),
+];
 
 const validateGroupUpdate = [
-    body("targetid")
-        .optional({values: "falsy"})
-        .isUUID().withMessage("Must be an UUID"),
-    body("action")
-        .optional({values: "falsy"})
-        .isIn(["REMOVE", "PROMOTE", "DEMOTE"]).withMessage("Types can only be REMOVE, DEMOTE or PROMOTE"),
+  body("targetid")
+    .optional({ values: "falsy" })
+    .isUUID()
+    .withMessage("Must be an UUID"),
+  body("action")
+    .optional({ values: "falsy" })
+    .isIn(["REMOVE", "PROMOTE", "DEMOTE"])
+    .withMessage("Types can only be REMOVE, DEMOTE or PROMOTE"),
 ];
 
 const validateConvoQuery = [
-    query("type")
-    .optional({values: "falsy"})
-    .isAlpha().withMessage("Only letters")
-]
+  query("type")
+    .optional({ values: "falsy" })
+    .isAlpha()
+    .withMessage("Only letters"),
+];
 
 const validateGroupName = [
-    body("name")
-    .optional({values: "falsy"})
+  body("name")
+    .optional({ values: "falsy" })
     .notEmpty()
-    .isAscii().withMessage("Must be Ascii")
+    .isAscii()
+    .withMessage("Must be Ascii"),
+];
 
-]
-
-export { validateConvoQuery, validateGroupName, validateOptionalMessage, validateGroupUpdate, validateMessage, validateSearchUser, validateCredentials, validateUUID, validateType, validateBodyUUID, validateRequestGroup, validateOptionalUUID, validateUserProfile, validateOptionalCredentials };
+export {
+  validateConvoQuery,
+  validateGroupName,
+  validateOptionalMessage,
+  validateGroupUpdate,
+  validateMessage,
+  validateSearchUser,
+  validateCredentials,
+  validateUUID,
+  validateType,
+  validateBodyUUID,
+  validateRequestGroup,
+  validateOptionalUUID,
+  validateUserProfile,
+  validateOptionalCredentials,
+};

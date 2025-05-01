@@ -4,10 +4,15 @@ import { validationErrorMiddleware } from "../middleware/validationErrorMiddlewa
 import { validateUUID } from "../util/validators";
 import { getFriends, deleteFriend } from "../controllers/friendsController";
 
-
 const friendsRoute = Router();
 
 friendsRoute.get("/", isAuth, getFriends);
-friendsRoute.delete("/:targetid", isAuth, validateUUID("targetid"), validationErrorMiddleware, deleteFriend);
+friendsRoute.delete(
+  "/:targetid",
+  isAuth,
+  validateUUID("targetid"),
+  validationErrorMiddleware,
+  deleteFriend,
+);
 
 export default friendsRoute;

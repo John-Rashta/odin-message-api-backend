@@ -1,7 +1,7 @@
-import express from 'express';
+import express from "express";
 import session from "express-session";
 import prisma from "../config/client";
-import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import authRoute from "../routes/authRoute";
 import usersRoute from "../routes/usersRoute";
 import requestsRoute from "../routes/requestsRoute";
@@ -12,11 +12,10 @@ import messagesRoute from "../routes/messagesRoute";
 import passport from "passport";
 import { errorHandler } from "../middleware/errorMiddleware";
 
-const storeStuff = new PrismaSessionStore(prisma,
-  {
-    checkPeriod: 2 * 60 * 1000,  //ms
-    dbRecordIdIsSessionId: true,
-    dbRecordIdFunction: undefined,
+const storeStuff = new PrismaSessionStore(prisma, {
+  checkPeriod: 2 * 60 * 1000, //ms
+  dbRecordIdIsSessionId: true,
+  dbRecordIdFunction: undefined,
 });
 
 const app = express();
@@ -24,15 +23,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use(session({
-    secret: process.env.SECRET as string, 
-    resave: true, 
+app.use(
+  session({
+    secret: process.env.SECRET as string,
+    resave: true,
     saveUninitialized: true,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24
+      maxAge: 1000 * 60 * 60 * 24,
     },
-    store: storeStuff
-  }));
+    store: storeStuff,
+  }),
+);
 
 import "../config/passport";
 

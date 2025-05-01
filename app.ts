@@ -6,7 +6,7 @@ import "dotenv/config";
 import cors from "cors";
 import { errorHandler } from "./middleware/errorMiddleware";
 import prisma from "./config/client";
-import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import authRoute from "./routes/authRoute";
 import usersRoute from "./routes/usersRoute";
 import requestsRoute from "./routes/requestsRoute";
@@ -17,24 +17,23 @@ import messagesRoute from "./routes/messagesRoute";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({credentials: true, origin: "http://localhost:5173"}));
+app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 
-app.use(session({
-  secret: process.env.SECRET as string, 
-  resave: true, 
-  saveUninitialized: true,
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24
-  },
-  store: new PrismaSessionStore(
-    prisma,
-    {
-      checkPeriod: 2 * 60 * 1000,  //ms
+app.use(
+  session({
+    secret: process.env.SECRET as string,
+    resave: true,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+    store: new PrismaSessionStore(prisma, {
+      checkPeriod: 2 * 60 * 1000, //ms
       dbRecordIdIsSessionId: true,
       dbRecordIdFunction: undefined,
-    }
-  )
-}));
+    }),
+  }),
+);
 
 import "./config/passport";
 

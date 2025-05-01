@@ -11,11 +11,11 @@ const validationErrorMiddleware: Handler = async (
   if (!errors.isEmpty()) {
     if (req.file) {
       await deleteLocalFile(req.file);
-    };
+    }
     const result = errors.formatWith((error) => error.msg).array();
     res.status(400).json({ message: result });
     return;
-  };
+  }
   next();
 };
 
