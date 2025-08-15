@@ -17,7 +17,10 @@ import messagesRoute from "./routes/messagesRoute";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+app.use(cors({ 
+  credentials: true, 
+  origin: ["http://localhost:5173",  ]
+}));
 
 app.use(
   session({
@@ -50,8 +53,8 @@ app.use("/groups", groupsRoute);
 
 app.use(errorHandler);
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`Listening on Port ${PORT}`);
 });
