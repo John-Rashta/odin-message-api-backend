@@ -197,6 +197,8 @@ const createMessageInGroup = asyncHandler(async (req, res) => {
     fileInfo = await uploadFile(req.file);
   }
 
+  console.log("hello")
+  console.log(fileInfo)
   await createMessage(req.user.id, new Date(), {
     groupid: formData.groupid,
     content: formData.content,

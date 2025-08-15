@@ -40,6 +40,7 @@ const deleteLocalFile = async function deleteFileFromTemporaryLocalStorage(
   if (!fileStuff) {
     return;
   }
+  console.log(fileStuff)
   await unlinkWithAsync(fileStuff.path);
   return;
 };
