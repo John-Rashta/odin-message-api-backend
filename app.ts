@@ -22,6 +22,7 @@ app.use(cors({
   origin: ["http://localhost:5173", `https://${String(process.env.FRONTEND_URL)}`]
 }));
 
+app.set("trust proxy", 1);
 app.use(
   session({
     secret: process.env.SECRET as string,
@@ -31,8 +32,8 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24,
       secure: true,
       httpOnly: true,
-      sameSite: 'lax',
-      domain: '.railway.app'
+      sameSite: "none",
+      domain: ".railway.app"
     },
     store: new PrismaSessionStore(prisma, {
       checkPeriod: 2 * 60 * 1000, //ms
