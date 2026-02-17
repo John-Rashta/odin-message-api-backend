@@ -33,7 +33,6 @@ app.use(
       secure: true,
       httpOnly: true,
       sameSite: "none",
-      domain: ".railway.app"
     },
     store: new PrismaSessionStore(prisma, {
       checkPeriod: 2 * 60 * 1000, //ms
