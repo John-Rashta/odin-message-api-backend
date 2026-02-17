@@ -31,7 +31,8 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24,
       secure: true,
       httpOnly: true,
-      sameSite: "none"
+      sameSite: "none",
+      domain: ".railway.app"
     },
     store: new PrismaSessionStore(prisma, {
       checkPeriod: 2 * 60 * 1000, //ms
